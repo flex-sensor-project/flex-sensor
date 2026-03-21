@@ -2,5 +2,5 @@
 |:------|-------|:------------------------------|
 | 1     | 5     | Sparkfun FlexSensor SEN-10264 |
 | 2     | 1     | Seeed Studio XIAO ESP32-S3    |
-| 3     | 5     | Rezystor 10k                  |
+| 3     | 5     | Rezystor 15k                  |
 
