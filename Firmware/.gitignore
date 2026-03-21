@@ -1,0 +1,14 @@
+# Simple ESP-IDF gitignore
+
+# Build Directory
+build
+
+# Generated config
+sdkconfig
+sdkconfig.old
+
+# Hardware/Flash Artifacts
+*.bin
+*.elf
+*.map
+
