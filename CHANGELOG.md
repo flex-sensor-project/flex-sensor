@@ -8,6 +8,7 @@
 - Designed the first version of the schematic
 ### Fixed
 - Updated BOM.md to match the schematic
+- Corrected the wiring of voltage dividers in flex sensor circuits
 
 # 21.03.2026
 ## General
