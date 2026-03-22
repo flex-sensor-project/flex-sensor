@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "MCU_XIAO")(type "KiCad")(uri "${KIPRJMOD}/MCU_XIAO.kicad_sym")(options "")(descr ""))
+)
