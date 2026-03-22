@@ -6,6 +6,8 @@
 - BMS_Module symbol library
 - BMS-1s symbol
 - Designed the first version of the schematic
+### Fixed
+- Updated BOM.md to match the schematic
 
 # 21.03.2026
 ## General
