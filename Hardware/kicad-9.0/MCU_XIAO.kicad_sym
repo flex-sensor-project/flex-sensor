@@ -7,15 +7,15 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "U"
-			(at -4.318 7.874 0)
+			(at -4.318 7.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" ""
-			(at 0 0 0)
+		(property "Value" "XIAO-ESP32-S3"
+			(at 2.286 -19.558 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -188,7 +188,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 0 -20.32 90)
+				(at -7.62 -15.24 0)
 				(length 2.54)
 				(name "BAT+"
 					(effects
@@ -198,24 +198,6 @@
 					)
 				)
 				(number "15"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin bidirectional line
-				(at 5.08 -20.32 90)
-				(length 2.54)
-				(name "BAT-"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "16"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -342,6 +324,24 @@
 					)
 				)
 				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -15.24 180)
+				(length 2.54)
+				(name "BAT-"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
 					(effects
 						(font
 							(size 1.27 1.27)
