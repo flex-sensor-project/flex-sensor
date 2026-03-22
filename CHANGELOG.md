@@ -3,6 +3,8 @@
 ### Addedd
 - MCU_XIAO symbol library
 - XIAO-ESP32-S3 symbol
+- BMS_Module symbol library
+- BMS-1s symbol
 
 # 21.03.2026
 ## General
