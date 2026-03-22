@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "MCU_XIAO")(type "KiCad")(uri "${KIPRJMOD}/symbol_libraries/MCU_XIAO.kicad_sym")(options "")(descr ""))
   (lib (name "BMS_Module")(type "KiCad")(uri "${KIPRJMOD}/symbol_libraries/BMS_Module.kicad_sym")(options "")(descr ""))
+  (lib (name "Sensor_Flex")(type "KiCad")(uri "${KIPRJMOD}/symbol_libraries/Sensor_Flex.kicad_sym")(options "")(descr ""))
 )
