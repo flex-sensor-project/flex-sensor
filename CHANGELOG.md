@@ -5,6 +5,7 @@
 - XIAO-ESP32-S3 symbol
 - BMS_Module symbol library
 - BMS-1s symbol
+- Designed the first version of the schematic
 
 # 21.03.2026
 ## General
