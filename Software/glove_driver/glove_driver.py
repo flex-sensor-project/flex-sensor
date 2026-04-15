@@ -23,7 +23,10 @@ def notify_handler(sender, data):
 
     if 'E' in notify_buffer :
 
-        print("Received: " + notify_buffer)
+        if len(notify_buffer) != 25:
+            print("Received a invalid: " + notify_buffer)
+        #else:
+            #print("Received: " + notify_buffer)
         dyn_val_raw.set(notify_buffer)
         notify_buffer = ""
     
@@ -31,41 +34,35 @@ def notify_handler(sender, data):
 
 #  main_connect(ble_address) by protobioengineering - protobioengineering.github.io
 async def main_connect(ble_address):
-    print(f'Looking for Bluetooth LE device at address `{ble_address}`...')
-    device = await BleakScanner.find_device_by_filter(
-        lambda d, ad: service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
-        timeout=20.0
-    )    
-    
-    if(device == None):
-        print(f'A Bluetooth LE device with the address `{ble_address}` was not found.')
-        button_connect.config(state="normal")
-    else:
-        print(f'Client found at address: {ble_address}')
-        print(f'Connecting...')
+    try:
+        print(f'Looking for Bluetooth LE device at address `{ble_address}`...')
+        device = await BleakScanner.find_device_by_filter(
+            lambda d, ad: service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
+            timeout=20.0
+        )    
+        
+        if device == None:
+            print(f'A Bluetooth LE device with the address `{ble_address}` was not found.')
+        else:
+            print(f'Client found at address: {ble_address}')
+            print(f'Connecting...')
 
-        # This `async` block starts and keeps the Bluetooth LE device connection.
-        # Once the `async` block exits, BLE device automatically disconnects.
-        try:
             async with BleakClient(device) as client:
                 print(f'Client connection = {client.is_connected}')
-
                 await asyncio.sleep(2.0)
-
                 await client.start_notify(characteristic_uuid, notify_handler)
                 print("characteristic found")
 
-                #await asyncio.sleep(float('inf'))
                 stop_event = asyncio.Event()
                 await stop_event.wait()
-        except Exception as e:
-            print("Error connection lost: " + e)
-        finally:
-            button_connect.config(state="normal")
+                
+            print(f'Disconnected from `{ble_address}`')
 
-        print(f'Disconnected from `{ble_address}`')
-
-
+    except Exception as e:
+        print(f"Error connection lost or failed: {e}")
+        
+    finally:
+        button_connect.config(state="normal")
 
 
 def _task_BLE():
