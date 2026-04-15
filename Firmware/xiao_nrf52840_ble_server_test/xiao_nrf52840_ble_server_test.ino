@@ -10,6 +10,9 @@ BLECharacteristic gloveCharacteristics(chr_uuid);
 void setup() {
   Serial.begin(115200);
 
+  Bluefruit.configPrphConn(64, BLE_GAP_EVENT_LENGTH_DEFAULT, BLE_GATTS_HVN_TX_QUEUE_SIZE_DEFAULT, BLE_GATTC_WRITE_CMD_TX_QUEUE_SIZE_DEFAULT);
+
+
   // Initialize the Bluefruit module
   Bluefruit.begin();
   Bluefruit.setName("XIAO_Sensor");
