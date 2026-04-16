@@ -49,6 +49,7 @@ class windowGui:
         self.window.mainloop()
         return
 
+    @DeprecationWarning
     def update_raw_value(self, val):
         self.dyn_val_raw.set(val)
 
@@ -58,18 +59,12 @@ class windowGui:
     def update_units(self, val):
         self.dyn_val_units.set(str(val))
 
-    def update_raw(self, byte_data):
+    def update_raw(self, data):
         
-        decoded = byte_data.decode('utf-8', errors='ignore')
-
-        raw_units = decoded.split('A')
-
         fixed_units = []
-        for unit in raw_units:
-            if unit != "":
-                temp_unit = "A" + unit
-                fixed_units.append(temp_unit)
-
+        for unit in data:
+            temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
+            fixed_units.append(temp)
         self.textbox_raw.config(state="normal")
         self.textbox_raw.delete("1.0", tk.END)
 
@@ -77,6 +72,14 @@ class windowGui:
 
         self.textbox_raw.insert(tk.END, formatted_units)
         self.textbox_raw.config(state="disabled")
+
+        if len(data) > 0:
+            first_packet = data[0]
+            self.dyn_val_A.set(str(first_packet[0]))
+            self.dyn_val_B.set(str(first_packet[1]))
+            self.dyn_val_C.set(str(first_packet[2]))
+            self.dyn_val_D.set(str(first_packet[3]))
+            self.dyn_val_E.set(str(first_packet[4]))
 
 
     def _on_button_click_connect(self):
