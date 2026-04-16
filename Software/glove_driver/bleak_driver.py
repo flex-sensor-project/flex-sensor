@@ -39,7 +39,8 @@ class BleakDriver:
                 print("Received an invalid: " + self.notify_buffer)
             #else:
                 #print("Received: " + self.notify_buffer)
-            self.parent.dyn_val_raw.set(self.notify_buffer)
+            #self.parent.dyn_val_raw.set(self.notify_buffer)
+            self.parent.window.after(0, self.parent.update_raw_value, self.notify_buffer)
             self.notify_buffer = ""
 
     #  main_connect(ble_address) by protobioengineering - protobioengineering.github.io
@@ -72,4 +73,5 @@ class BleakDriver:
             print(f"Error connection lost or failed: {e}")
         
         finally:
-           self.parent.button_connect.config(state="normal")
+           #self.parent.button_connect.config(state="normal")
+           self.parent.window.after(0, self.parent.enable_button_connect)
