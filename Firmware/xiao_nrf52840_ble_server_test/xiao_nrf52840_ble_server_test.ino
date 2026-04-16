@@ -7,6 +7,9 @@ BLEUuid chr_uuid = BLEUuid("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 BLEService gloveService(svc_uuid);
 BLECharacteristic gloveCharacteristics(chr_uuid);
 
+char sendBuffer[64];
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -16,6 +19,8 @@ void setup() {
   // Initialize the Bluefruit module
   Bluefruit.begin();
   Bluefruit.setName("XIAO_Sensor");
+
+  Bluefruit.Periph.setConnInterval(6,12);
 
   // Setup the Service
   gloveService.begin();
@@ -59,15 +64,18 @@ void loop() {
     int randThumbf = random (1000, 5500);
     //String tempVal = String(randomTemp) + " C";
 
-    String sendVal = "A" + String(randIndexf) + "B" + String(randMiddlef)
-    + "C" + String(randRingf) + "D" + String(randPinkyf) + "E" + String(randThumbf);
+    //String sendVal = "A" + String(randIndexf) + "B" + String(randMiddlef)
+    //+ "C" + String(randRingf) + "D" + String(randPinkyf) + "E" + String(randThumbf);
+    snprintf(sendBuffer, sizeof(sendBuffer), "A%dB%dC%dD%dE%d", randIndexf, 
+    randMiddlef, randRingf, randPinkyf, randThumbf);
+    
     // Push the notification to the connected client
-    gloveCharacteristics.notify(sendVal.c_str(), sendVal.length());
+    gloveCharacteristics.notify(sendBuffer, strlen(sendBuffer));
 
-    Serial.print("Notified value: ");
-    Serial.println(sendVal);
+    //Serial.print("Notified value: ");
+    //Serial.println(sendBuffer);
 
     // Wait one second before sending the next value
-    delay(5000);
+    //delay(5);
   }
 }

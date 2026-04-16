@@ -11,13 +11,14 @@ class windowGui:
         self.bd = BleakDriver(self)
 
         self.window.title("Glove driver")
-        self.window.geometry("350x250")
-        self.window.minsize(350, 250)
+        self.window.geometry("350x680")
+        self.window.minsize(350, 680)
 
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
 
+        self.textbox_raw = tk.Text(self.window, height=32, width=40)
        
-        self.label_raw = tk.Label(self.window, text="Raw:")
+        #self.label_raw = tk.Label(self.window, text="Raw:")
         self.label_A = tk.Label(self.window, text="Index A:")
         self.label_B = tk.Label(self.window, text="Middle B:")
         self.label_C = tk.Label(self.window, text="Ring C:")
@@ -26,7 +27,7 @@ class windowGui:
 
         self.dyn_val_units = tk.StringVar()
 
-        self.dyn_val_raw = tk.StringVar()
+        #self.dyn_val_raw = tk.StringVar()
         self.dyn_val_A  = tk.StringVar()
         self.dyn_val_B = tk.StringVar()
         self.dyn_val_C = tk.StringVar()
@@ -35,7 +36,7 @@ class windowGui:
 
         self.lbl_val_units = tk.Label(self.window, textvariable=self.dyn_val_units)
 
-        self.lbl_val_raw = tk.Label(self.window, textvariable=self.dyn_val_raw)
+        #self.lbl_val_raw = tk.Label(self.window, textvariable=self.dyn_val_raw)
         self.lbl_val_A = tk.Label(self.window, textvariable=self.dyn_val_A)
         self.lbl_val_B = tk.Label(self.window, textvariable=self.dyn_val_B)
         self.lbl_val_C = tk.Label(self.window, textvariable=self.dyn_val_C)
@@ -57,6 +58,27 @@ class windowGui:
     def update_units(self, val):
         self.dyn_val_units.set(str(val))
 
+    def update_raw(self, byte_data):
+        
+        decoded = byte_data.decode('utf-8', errors='ignore')
+
+        raw_units = decoded.split('A')
+
+        fixed_units = []
+        for unit in raw_units:
+            if unit != "":
+                temp_unit = "A" + unit
+                fixed_units.append(temp_unit)
+
+        self.textbox_raw.config(state="normal")
+        self.textbox_raw.delete("1.0", tk.END)
+
+        formatted_units = "\n".join(fixed_units)
+
+        self.textbox_raw.insert(tk.END, formatted_units)
+        self.textbox_raw.config(state="disabled")
+
+
     def _on_button_click_connect(self):
 
         #asyncio.run(main_connect(sys.argv[1] if len(sys.argv) == 2 else address))
@@ -77,21 +99,23 @@ class windowGui:
     def _define_view(self):
         self.dyn_val_units.set("0")
 
-        self.label_raw.grid(row=0, column=2)
-        self.lbl_val_raw.grid(row=0, column=4)
-        self.label_A.grid(row=1,column=0)
-        self.lbl_val_A.grid(row=1, column=1)
-        self.label_B.grid(row=2,column=0)
-        self.lbl_val_B.grid(row=2, column=1)
-        self.label_C.grid(row=3,column=0)
-        self.lbl_val_C.grid(row=3, column=1)
-        self.label_D.grid(row=4,column=0)
-        self.lbl_val_D.grid(row=4, column=1)
-        self.label_E.grid(row=5,column=0)
-        self.lbl_val_E.grid(row=5, column=1)
+        #self.label_raw.grid(row=0, column=2)
+        #self.lbl_val_raw.grid(row=0, column=4)
+        self.label_A.grid(row=0, column=0)
+        self.lbl_val_A.grid(row=0, column=1)
+        self.label_B.grid(row=1, column=0)
+        self.lbl_val_B.grid(row=1, column=1)
+        self.label_C.grid(row=2, column=0)
+        self.lbl_val_C.grid(row=2, column=1)
+        self.label_D.grid(row=3, column=0)
+        self.lbl_val_D.grid(row=3, column=1)
+        self.label_E.grid(row=4, column=0)
+        self.lbl_val_E.grid(row=4, column=1)
 
-        self.lbl_val_units.grid(row=6, column = 2)
+        self.lbl_val_units.grid(row=5, column=2)
 
-        self.button_connect.grid(row=7, column=2)
+        self.button_connect.grid(row=6, column=2)
+
+        self.textbox_raw.grid(row=7, column=0, columnspan=5, pady=10)
 
         return
