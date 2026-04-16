@@ -2,3 +2,4 @@ build/
 dist/*
 !dist/*.exe
 *.spec
+__pycache__/
