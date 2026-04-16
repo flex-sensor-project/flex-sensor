@@ -5,8 +5,6 @@ from bleak_driver import BleakDriver
 class windowGui:
     
 
-   
-
     def __init__(self):
         self.window = tk.Tk()
 
@@ -18,6 +16,7 @@ class windowGui:
 
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
 
+       
         self.label_raw = tk.Label(self.window, text="Raw:")
         self.label_A = tk.Label(self.window, text="Index A:")
         self.label_B = tk.Label(self.window, text="Middle B:")
@@ -25,12 +24,16 @@ class windowGui:
         self.label_D = tk.Label(self.window, text="Pinky D:")
         self.label_E = tk.Label(self.window, text="Thumb E:")
 
+        self.dyn_val_units = tk.StringVar()
+
         self.dyn_val_raw = tk.StringVar()
         self.dyn_val_A  = tk.StringVar()
         self.dyn_val_B = tk.StringVar()
         self.dyn_val_C = tk.StringVar()
         self.dyn_val_D = tk.StringVar()
         self.dyn_val_E = tk.StringVar()
+
+        self.lbl_val_units = tk.Label(self.window, textvariable=self.dyn_val_units)
 
         self.lbl_val_raw = tk.Label(self.window, textvariable=self.dyn_val_raw)
         self.lbl_val_A = tk.Label(self.window, textvariable=self.dyn_val_A)
@@ -51,6 +54,9 @@ class windowGui:
     def enable_button_connect(self):
         self.button_connect.config(state="normal")
 
+    def update_units(self, val):
+        self.dyn_val_units.set(str(val))
+
     def _on_button_click_connect(self):
 
         #asyncio.run(main_connect(sys.argv[1] if len(sys.argv) == 2 else address))
@@ -69,6 +75,8 @@ class windowGui:
 
 
     def _define_view(self):
+        self.dyn_val_units.set("0")
+
         self.label_raw.grid(row=0, column=2)
         self.lbl_val_raw.grid(row=0, column=4)
         self.label_A.grid(row=1,column=0)
@@ -82,6 +90,8 @@ class windowGui:
         self.label_E.grid(row=5,column=0)
         self.lbl_val_E.grid(row=5, column=1)
 
-        self.button_connect.grid(row=6, column=2)
+        self.lbl_val_units.grid(row=6, column = 2)
+
+        self.button_connect.grid(row=7, column=2)
 
         return
