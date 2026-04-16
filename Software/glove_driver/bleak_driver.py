@@ -1,5 +1,6 @@
 import asyncio
 
+import struct
 import threading
 
 
@@ -13,8 +14,8 @@ class BleakDriver:
         self.service_uuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'   
         self.characteristic_uuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
         
-        #self.notify_buffer = ""
-        self.byte_buffer = bytearray()
+        
+        self.packet_buffer = []
 
         self.parent = parent
         self.ble_unit_count = 0
@@ -29,11 +30,12 @@ class BleakDriver:
 
     
     def _notify_handler(self, sender, data):
+    
+        if len(data) == 10:
+            values = struct.unpack('5H', data)
         
-        #payload = data.decode('utf-8')
-        #self.notify_buffer += payload
-        self.byte_buffer.extend(data)
-
+            self.packet_buffer.append(values)
+            self.ble_unit_count += 1
         #TODO implement validating received payload
         #if 'E' in self.notify_buffer :
             #if len(self.notify_buffer) < 25:
@@ -44,20 +46,20 @@ class BleakDriver:
            
             #self.parent.window.after(0, self.parent.update_raw_value, self.notify_buffer)
             #self.notify_buffer = ""
-        self.ble_unit_count += 1
+            
 
     async def _trigger_1s(self):
         try:
             while True:
                 await asyncio.sleep(1.0)
 
-                if len(self.byte_buffer) > 0:
-                    byte_batch = self.byte_buffer.copy()
-                    self.byte_buffer.clear()
+                if len(self.packet_buffer) > 0:
+                    batch = self.packet_buffer.copy()
+                    self.packet_buffer.clear()
 
-                    self.parent.window.after(0, self.parent.update_raw, byte_batch)
+                    self.parent.window.after(0, self.parent.update_raw, batch)
 
-                print("units per second: " + str(self.ble_unit_count))
+                #print("units per second: " + str(self.ble_unit_count))
                 
                 #self.parent.update_units(self.ble_unit_count)
                

@@ -28,7 +28,7 @@ void setup() {
   // Setup the Characteristic with Read and Notify properties
   gloveCharacteristics.setProperties(CHR_PROPS_READ | CHR_PROPS_NOTIFY);
   gloveCharacteristics.setPermission(SECMODE_OPEN, SECMODE_NO_ACCESS);
-  gloveCharacteristics.setMaxLen(100);
+  gloveCharacteristics.setMaxLen(10);
   gloveCharacteristics.begin();
 
   gloveCharacteristics.setUserDescriptor("glove data");
@@ -54,8 +54,19 @@ void setup() {
 void loop() {
   // Check if a device is currently connected
   if (Bluefruit.connected()) {
+
+    int16_t fingers[5];
+
+    fingers[0] = random(1000, 5500);
+    fingers[1] = random(1000, 5500);
+    fingers[2] = random(1000, 5500);
+    fingers[3] = random(1000, 5500);
+    fingers[4] = random(1000, 5500);
     
+    gloveCharacteristics.notify(fingers, sizeof(fingers));
+
     // Generate a random temperature between 20 and 30
+    /*
     int randomTemp = random(20, 31);
     int randIndexf = random (1000, 5500);
     int randMiddlef = random (1000, 5500);
@@ -63,7 +74,7 @@ void loop() {
     int randPinkyf = random (1000, 5500);
     int randThumbf = random (1000, 5500);
     //String tempVal = String(randomTemp) + " C";
-
+    
     //String sendVal = "A" + String(randIndexf) + "B" + String(randMiddlef)
     //+ "C" + String(randRingf) + "D" + String(randPinkyf) + "E" + String(randThumbf);
     snprintf(sendBuffer, sizeof(sendBuffer), "A%dB%dC%dD%dE%d", randIndexf, 
@@ -71,7 +82,7 @@ void loop() {
     
     // Push the notification to the connected client
     gloveCharacteristics.notify(sendBuffer, strlen(sendBuffer));
-
+    */
     //Serial.print("Notified value: ");
     //Serial.println(sendBuffer);
 
