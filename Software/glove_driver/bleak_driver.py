@@ -5,6 +5,7 @@ from logging import log
 import struct
 import threading
 
+import os
 
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
@@ -20,11 +21,14 @@ class Logger:
                 cls._instance._setup_logger()
         return cls._instance
     
-    def _setup_logger(self):
+    def _setup_logger(self):    
+        log_dir = "logs"
+        os.makedirs(log_dir, exist_ok=True)
+
         self._write_lock = threading.Lock()
         now = datetime.datetime.now()
         date_hour_string = now.strftime("%Y-%m-%d_%H-%M")
-        self.file_name = date_hour_string + ".log"
+        self.file_name =os.path.join(log_dir, date_hour_string + ".log")
 
         with open(self.file_name, 'a') as f:
             f.write(f"Log started at {now}\n")
@@ -52,10 +56,12 @@ class BleakDriver:
 
         self.parent = parent
         self.ble_unit_count = 0
+        self.logger.log("BleakDriver initialized")
     
     def connect(self):
         ble_thread = threading.Thread(target=self._task_BLE, daemon=True)
         ble_thread.start()
+        self.logger.log("Started BLE thread")
 
     def _task_BLE(self):
         # This runs the async loop in the background thread
@@ -98,8 +104,8 @@ class BleakDriver:
                
                
                 self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
+                self.logger.log("Units per second: " + str(self.ble_unit_count))
                 self.ble_unit_count = 0
-
 
                 #self.parent.window.after(0, self.parent.update_raw, self.buffer)
         except asyncio.CancelledError:
@@ -109,25 +115,30 @@ class BleakDriver:
     #  main_connect(ble_address) by protobioengineering - protobioengineering.github.io
     async def _main_connect(self, ble_address):
         try:
-            print(f'Looking for Bluetooth LE device at address `{ble_address}`...')
+            #print(f'Looking for Bluetooth LE device at address `{ble_address}`...')
+            self.logger.log("Looking for Bluetooth LE device with service UUID: " + str(ble_address))
             device = await BleakScanner.find_device_by_filter(
                 lambda d, ad: self.service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
                 timeout=20.0
             )    
         
             if device == None:
-                print(f'A Bluetooth LE device with the address `{ble_address}` was not found.')
+                #print(f'A Bluetooth LE device with the address `{ble_address}` was not found.')
+                self.logger.log("No device found with service UUID: " + str(ble_address))
             else:
-                print(f'Client found at address: {ble_address}')
-                print(f'Connecting...')
+                
+                #print(f'Client found at address: {ble_address}')
+                #print(f'Connecting...')
+                self.logger.log("Client found," + str(ble_address) + ", connecting")
 
                 async with BleakClient(device) as client:
-                    print(f'Client connection = {client.is_connected}')
+                    #print(f'Client connection = {client.is_connected}')
+                    self.logger.log("Connected connection:" + str(client.is_connected))
                     await asyncio.sleep(2.0)
                     await client.start_notify(self.characteristic_uuid, self._notify_handler)
-                    print("characteristic found")
+                    #print("characteristic found")
+                    self.logger.log("Characteristic found")
 
-                    
                     units_task = asyncio.create_task(self._trigger_1s())
 
 
@@ -136,11 +147,13 @@ class BleakDriver:
                 
                     units_task.cancel()
 
-                print(f'Disconnected from `{ble_address}`')
-
+                #print(f'Disconnected from `{ble_address}`')
+                self.logger.log("Disconnected from:" + str(ble_address))
         except Exception as e:
-            print(f"Error connection lost or failed: {e}")
+            #print(f"Error connection lost or failed: {e}")
+            self.logger.log("Error connection lost or failed: " +  str(e))
         
         finally:
            #self.parent.button_connect.config(state="normal")
            self.parent.window.after(0, self.parent.enable_button_connect)
+           self.logger.log("BLE connection task ended, can connect again")
