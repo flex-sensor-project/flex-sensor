@@ -68,6 +68,7 @@ class windowGui:
 
     def enable_button_connect(self):
         self.button_connect.config(state="normal")
+        self.button_disconnect.config(state="disabled")
 
     def update_units(self, val):
         self.dyn_val_units.set(str(val))
@@ -128,7 +129,8 @@ class windowGui:
             self.update_textbox("Warning: Selected device does not have a service UUID. Connection may fail.")  
         else:
             self.button_connect.config(state="disabled")
-        
+            self.button_disconnect.config(state="normal")
+            
             self.bd.connect()
 
         #self.dyn_val_A.set("1234")
