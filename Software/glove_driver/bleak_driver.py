@@ -1,5 +1,7 @@
 import asyncio
 
+import datetime
+from logging import log
 import struct
 import threading
 
@@ -7,8 +9,39 @@ import threading
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
 
+class Logger: 
+    _instance = None
+    _singleton_lock = threading.Lock()
+
+    def __new__(cls):
+        with cls._singleton_lock:
+            if cls._instance is None:
+                cls._instance = super(Logger, cls).__new__(cls)
+                cls._instance._setup_logger()
+        return cls._instance
+    
+    def _setup_logger(self):
+        self._write_lock = threading.Lock()
+        now = datetime.datetime.now()
+        date_hour_string = now.strftime("%Y-%m-%d_%H-%M")
+        self.file_name = date_hour_string + ".log"
+
+        with open(self.file_name, 'a') as f:
+            f.write(f"Log started at {now}\n")
+
+    def log(self, msg):
+        now = datetime.datetime.now()
+        time_string = now.strftime("%H:%M:%S")
+        log_entry = time_string + " - " + msg + "\n"
+
+        with self._write_lock:
+            with open(self.file_name, 'a') as f:
+                f.write(log_entry)
+
 
 class BleakDriver:
+
+    logger = Logger()
 
     def __init__(self, parent):
         self.service_uuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'   
@@ -32,7 +65,7 @@ class BleakDriver:
     def _notify_handler(self, sender, data):
     
         if len(data) == 10:
-            values = struct.unpack('5H', data)
+            values = struct.unpack('<5H', data)
         
             self.packet_buffer.append(values)
             self.ble_unit_count += 1
