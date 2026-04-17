@@ -49,10 +49,10 @@ class BleakDriver:
 
     def __init__(self, parent):
         #self.service_uuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'   
-        self.characteristic_uuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
+        #self.characteristic_uuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
         
         self.service_uuid = None
-        #self.characteristic_uuid = None
+        self.characteristic_uuid = None
 
         self.devices = []
         self.device_names = []
@@ -82,12 +82,12 @@ class BleakDriver:
         ble_thread = threading.Thread(target=self._task_BLE, daemon=True)
         ble_thread.start()
         self.logger.log("Started BLE thread")
-        self.parent.update_textbox("Started BLE thread.")
+        #self.parent.update_textbox("Started BLE thread.")
 
     def disconnect(self):
         self.connected = False
         self.logger.log("BLE disconnect requested")
-        self.parent.update_textbox("BLE disconnect requested.")
+        #self.parent.update_textbox("BLE disconnect requested.")
 
 
     def _task_scan(self):
@@ -144,7 +144,7 @@ class BleakDriver:
                 await asyncio.sleep(1.0)
 
                 if len(self.packet_buffer) > 0:
-                    batch = self.packet_buffer.copy()
+                    batch = self.packet_buffer
                     self.packet_buffer = []
 
                     self.parent.window.after(0, self.parent.update_raw, batch)
@@ -161,6 +161,16 @@ class BleakDriver:
                 #self.parent.window.after(0, self.parent.update_raw, self.buffer)
         except asyncio.CancelledError:
             pass
+
+
+    def _dynamic_char_search(self, client):
+        target_service = client.services.get_service(self.service_uuid)
+
+        if target_service:
+            for char in target_service.characteristics:
+                if "notify" in char.properties:
+                    return char.uuid
+        return None
 
 
     #  main_connect(ble_address) by protobioengineering - protobioengineering.github.io
@@ -180,48 +190,52 @@ class BleakDriver:
             )    
         
             if device == None:
-                #print(f'A Bluetooth LE device with the address `{ble_address}` was not found.')
                 self.logger.log("No device found with service UUID: " + str(ble_uuid))
                 self.parent.window.after(0, self.parent.update_textbox, "No device found with service UUID: " + str(ble_uuid))
             else:
                 
-                #print(f'Client found at address: {ble_address}')
-                #print(f'Connecting...')
+            
                 self.logger.log("Client found," + str(ble_uuid) + ", connecting")
-                self.parent.window.after(0, self.parent.update_textbox, "Client found," + str(ble_uuid) + ", connecting")
+                #self.parent.window.after(0, self.parent.update_textbox, "Client found," + str(ble_uuid) + ", connecting")
 
                 async with BleakClient(device) as client:
-                    #print(f'Client connection = {client.is_connected}')
+                    self.characteristic_uuid = self._dynamic_char_search(client)
+                    
+                    if self.characteristic_uuid is None:
+                        self.logger.log("COnnection failed: No characteristic with notify found")
+                        self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found")
+                        return 
+
+                    self.logger.log(f"Connected to device, found notify characteristic: {self.characteristic_uuid}") 
+                    self.parent.window.after(0, self.parent.update_textbox, f"Connected to device, found notify characteristic: {self.characteristic_uuid}")    
+
+                    
                     self.logger.log("Connected connection status: " + str(client.is_connected))
                     self.parent.window.after(0, self.parent.update_textbox, "Connected, connection status: " + str(client.is_connected))
+                    
                     await asyncio.sleep(2.0)
                     await client.start_notify(self.characteristic_uuid, self._notify_handler)
-                    #print("characteristic found")
+                    
                     self.logger.log("Characteristic found")
                     self.parent.window.after(0, self.parent.update_textbox, "Characteristic found")
                     
                     units_task = asyncio.create_task(self._trigger_1s())
 
-
-                    #stop_event = asyncio.Event()
-                    #await stop_event.wait()
-                
                     self.connected = True
                     while self.connected:
                         await asyncio.sleep(0.5)
 
                     units_task.cancel()
 
-                #print(f'Disconnected from `{ble_address}`')
+                
                 self.logger.log("Disconnected from:" + str(ble_uuid))
                 self.parent.window.after(0, self.parent.update_textbox, "Disconnected from:" + str(ble_uuid)) 
+        
         except Exception as e:
-            #print(f"Error connection lost or failed: {e}")
             self.logger.log("Error connection lost or failed: " +  str(e))
             self.parent.window.after(0, self.parent.update_textbox, "Error connection lost or failed: " +  str(e))
         
         finally:
-            #self.parent.button_connect.config(state="normal")
             self.parent.window.after(0, self.parent.enable_button_connect)
             self.logger.log("BLE connection task ended, can connect again")
             self.parent.window.after(0, self.parent.update_textbox, "BLE connection task ended, can connect again")
