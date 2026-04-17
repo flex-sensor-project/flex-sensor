@@ -10,37 +10,7 @@ import os
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
 
-class Logger: 
-    _instance = None
-    _singleton_lock = threading.Lock()
-
-    def __new__(cls):
-        with cls._singleton_lock:
-            if cls._instance is None:
-                cls._instance = super(Logger, cls).__new__(cls)
-                cls._instance._setup_logger()
-        return cls._instance
-    
-    def _setup_logger(self):    
-        log_dir = "logs"
-        os.makedirs(log_dir, exist_ok=True)
-
-        self._write_lock = threading.Lock()
-        now = datetime.datetime.now()
-        date_hour_string = now.strftime("%Y-%m-%d_%H-%M")
-        self.file_name =os.path.join(log_dir, f"{date_hour_string}.log")
-
-        with open(self.file_name, 'a') as f:
-            f.write(f"Log started at {now}\n")
-
-    def log(self, msg):
-        now = datetime.datetime.now()
-        time_string = now.strftime("%H:%M:%S")
-        log_entry = f"{time_string} - {msg}\n"
-
-        with self._write_lock:
-            with open(self.file_name, 'a') as f:
-                f.write(log_entry)
+from logger import Logger
 
 
 class BleakDriver:
@@ -149,16 +119,11 @@ class BleakDriver:
 
                     self.parent.window.after(0, self.parent.update_raw, batch)
 
-                #print("units per second: " + str(self.ble_unit_count))
-                
-                #self.parent.update_units(self.ble_unit_count)
-               
                
                 self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
                 self.logger.log("Units per second: " + str(self.ble_unit_count))
                 self.ble_unit_count = 0
 
-                #self.parent.window.after(0, self.parent.update_raw, self.buffer)
         except asyncio.CancelledError:
             pass
 
@@ -195,7 +160,7 @@ class BleakDriver:
             else:
                 
             
-                self.logger.log("Client found," + str(ble_uuid) + ", connecting")
+                self.logger.log("Client found, " + str(ble_uuid) + ", connecting")
                 #self.parent.window.after(0, self.parent.update_textbox, "Client found," + str(ble_uuid) + ", connecting")
 
                 async with BleakClient(device) as client:
@@ -228,7 +193,7 @@ class BleakDriver:
                     units_task.cancel()
 
                 
-                self.logger.log("Disconnected from:" + str(ble_uuid))
+                self.logger.log("Disconnected from: " + str(ble_uuid))
                 self.parent.window.after(0, self.parent.update_textbox, "Disconnected from:" + str(ble_uuid)) 
         
         except Exception as e:
