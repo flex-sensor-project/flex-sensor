@@ -60,8 +60,9 @@ class windowGui:
 
     def update_textbox(self, val):
         self.textbox_raw.config(state="normal")
-        self.textbox_raw.delete("1.0", tk.END)
-        self.textbox_raw.insert(tk.END, val)
+        #self.textbox_raw.delete("1.0", tk.END)
+        self.textbox_raw.insert(tk.END, f"{val}\n")
+        self.textbox_raw.see(tk.END)
         self.textbox_raw.config(state="disabled")
         return
 

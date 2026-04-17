@@ -121,7 +121,7 @@ class BleakDriver:
 
                
                 self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
-                self.logger.log("Units per second: " + str(self.ble_unit_count))
+                self.logger.log(f"Units per second: {self.ble_unit_count}.")
                 self.ble_unit_count = 0
 
         except asyncio.CancelledError:
@@ -146,9 +146,9 @@ class BleakDriver:
                 self.parent.window.after(0, self.parent.update_textbox, "Connection aborted: No service UUID specified.")  
                 return
             
-            #print(f'Looking for Bluetooth LE device at address `{ble_address}`...')
-            self.logger.log("Looking for Bluetooth LE device with service UUID: " + str(ble_uuid))
-            self.parent.window.after(0, self.parent.update_textbox, "Looking for Bluetooth LE device with service UUID: " + str(ble_uuid))
+            
+            self.logger.log(f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
+            self.parent.window.after(0, self.parent.update_textbox, f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
             device = await BleakScanner.find_device_by_filter(
                 lambda d, ad: self.service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
                 timeout=20.0
@@ -156,7 +156,7 @@ class BleakDriver:
         
             if device == None:
                 self.logger.log("No device found with service UUID: " + str(ble_uuid))
-                self.parent.window.after(0, self.parent.update_textbox, "No device found with service UUID: " + str(ble_uuid))
+                self.parent.window.after(0, self.parent.update_textbox, f"No device found with service UUID: {ble_uuid}.")
             else:
                 
             
@@ -167,22 +167,22 @@ class BleakDriver:
                     self.characteristic_uuid = self._dynamic_char_search(client)
                     
                     if self.characteristic_uuid is None:
-                        self.logger.log("COnnection failed: No characteristic with notify found")
-                        self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found")
+                        self.logger.log("COnnection failed: No characteristic with notify found.")
+                        self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found.")
                         return 
 
-                    self.logger.log(f"Connected to device, found notify characteristic: {self.characteristic_uuid}") 
-                    self.parent.window.after(0, self.parent.update_textbox, f"Connected to device, found notify characteristic: {self.characteristic_uuid}")    
+                    self.logger.log(f"Connected to device, found notify characteristic: {self.characteristic_uuid}.") 
+                    self.parent.window.after(0, self.parent.update_textbox, f"Connected to device, found notify characteristic: {self.characteristic_uuid}.")    
 
                     
                     self.logger.log("Connected connection status: " + str(client.is_connected))
-                    self.parent.window.after(0, self.parent.update_textbox, "Connected, connection status: " + str(client.is_connected))
+                    self.parent.window.after(0, self.parent.update_textbox, f"Connected, connection status: {client.is_connected}.")
                     
                     await asyncio.sleep(2.0)
                     await client.start_notify(self.characteristic_uuid, self._notify_handler)
                     
                     self.logger.log("Characteristic found")
-                    self.parent.window.after(0, self.parent.update_textbox, "Characteristic found")
+                    self.parent.window.after(0, self.parent.update_textbox, "Characteristic found.")
                     
                     units_task = asyncio.create_task(self._trigger_1s())
 
@@ -194,13 +194,13 @@ class BleakDriver:
 
                 
                 self.logger.log("Disconnected from: " + str(ble_uuid))
-                self.parent.window.after(0, self.parent.update_textbox, "Disconnected from:" + str(ble_uuid)) 
+                self.parent.window.after(0, self.parent.update_textbox, f"Disconnected from: {ble_uuid}.") 
         
         except Exception as e:
             self.logger.log("Error connection lost or failed: " +  str(e))
-            self.parent.window.after(0, self.parent.update_textbox, "Error connection lost or failed: " +  str(e))
+            self.parent.window.after(0, self.parent.update_textbox, f"Error connection lost or failed: {e}.")
         
         finally:
             self.parent.window.after(0, self.parent.enable_button_connect)
-            self.logger.log("BLE connection task ended, can connect again")
-            self.parent.window.after(0, self.parent.update_textbox, "BLE connection task ended, can connect again")
+            self.logger.log("BLE connection task ended, can connect again.")
+            self.parent.window.after(0, self.parent.update_textbox, "BLE connection task ended, can connect again.")
