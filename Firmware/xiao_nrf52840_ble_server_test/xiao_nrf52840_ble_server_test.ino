@@ -63,8 +63,10 @@ void loop() {
     fingers[3] = random(1000, 5500);
     fingers[4] = random(1000, 5500);
     
+
     gloveCharacteristics.notify(fingers, sizeof(fingers));
 
+    delay(25);
     // Generate a random temperature between 20 and 30
     /*
     int randomTemp = random(20, 31);
