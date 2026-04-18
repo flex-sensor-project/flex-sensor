@@ -11,12 +11,12 @@ BLEUuid chr_uuid = BLEUuid("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 BLEService gloveService(svc_uuid);
 BLECharacteristic gloveCharacteristics(chr_uuid);
 
-BLEBas batteryService;
+//BLEBas batteryService;
 
 char sendBuffer[64];
 
-uint32_t timer_battery_update = 0;
-int debug_adc = 0;
+//uint32_t timer_battery_update = 0;
+//int debug_adc = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -26,8 +26,8 @@ void setup() {
 
   Bluefruit.Periph.setConnInterval(6,12);
 
-  batteryService.begin();
-  batteryService.write(100);
+  //batteryService.begin();
+  //batteryService.write(100);
 
   pinMode(VBAT_ENABLE, OUTPUT);
   digitalWrite(VBAT_ENABLE, HIGH);
@@ -57,7 +57,7 @@ void setup() {
   Bluefruit.Advertising.addTxPower();
 
   Bluefruit.Advertising.addService(gloveService);
-  Bluefruit.Advertising.addService(batteryService);
+  //Bluefruit.Advertising.addService(batteryService);
 
   Bluefruit.Advertising.addName();
   Bluefruit.Advertising.restartOnDisconnect(true);
@@ -81,23 +81,12 @@ void loop() {
     fingers[4] = random(1000, 5500);
     
    
-    if (timer_battery_update >= 50){
-      digitalWrite(VBAT_ENABLE, LOW);
-      delay(5);
-      debug_adc = analogRead(PIN_VBAT);
-      digitalWrite(VBAT_ENABLE, HIGH);
-
-      long mapped_val = map(debug_adc, 340, 440, 0, 100);
-      uint8_t level_battery = constrain(mapped_val, 0, 100);
-      batteryService.notify(level_battery);
-
-      timer_battery_update = 0;
-    }
+    
 
     //uint16_t raw_val = debug_adc;
     gloveCharacteristics.notify(fingers, sizeof(fingers));
 
-    timer_battery_update += 1;
-    //delay(500);
+    //timer_battery_update += 1;
+    delay(10);
   }
 }

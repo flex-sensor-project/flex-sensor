@@ -80,18 +80,12 @@ class windowGui:
         self.textbox_raw.insert(tk.END, formatted_units)
         self.textbox_raw.config(state="disabled")
 
-        if len(data) > 0:
-            first_packet = data[0]
-            self.dyn_val_A.set(str(first_packet[0]))
-            self.dyn_val_B.set(str(first_packet[1]))
-            self.dyn_val_C.set(str(first_packet[2]))
-            self.dyn_val_D.set(str(first_packet[3]))
-            self.dyn_val_E.set(str(first_packet[4]))
-
 
     def _on_combobox_select(self, event):
         self.selected_index = self.combobox_devices.current()
         selected_uuid = self.bd.device_uuids[self.selected_index]
+
+        self.bd.selected_device = self.bd.devices[self.selected_index]
 
         if selected_uuid is not None:
             self.bd.service_uuid = selected_uuid

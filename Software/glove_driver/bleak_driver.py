@@ -24,6 +24,8 @@ class BleakDriver:
         self.service_uuid = None
         self.characteristic_uuid = None
 
+        self.selected_device = None
+
         self.devices = []
         self.device_names = []
         self.device_uuids = []
@@ -141,60 +143,68 @@ class BleakDriver:
     #  main_connect(ble_address) by protobioengineering - protobioengineering.github.io
     async def _main_connect(self, ble_uuid):
         try:
-            if ble_uuid is None:
-                self.logger.log("Connection aborted: No service UUID specified.")
-                self.parent.window.after(0, self.parent.update_textbox, "Connection aborted: No service UUID specified.")  
-                return
+            if self.selected_device is None:
+                    self.logger.log("Connection aborted: No device selected.")
+                    self.parent.window.after(0, self.parent.update_textbox, "Connection aborted: No device selected.")  
+                    return
+
+            #if ble_uuid is None:
+            #   self.logger.log("Connection aborted: No service UUID specified.")
+            #    self.parent.window.after(0, self.parent.update_textbox, "Connection aborted: No service UUID specified.")  
+            #    return
             
             
-            self.logger.log(f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
-            self.parent.window.after(0, self.parent.update_textbox, f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
-            device = await BleakScanner.find_device_by_filter(
-                lambda d, ad: self.service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
-                timeout=20.0
-            )    
+            #elf.logger.log(f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
+            #self.parent.window.after(0, self.parent.update_textbox, f"Looking for Bluetooth LE device with service UUID: {ble_uuid}.")
+            #device = await BleakScanner.find_device_by_filter(
+            #    lambda d, ad: self.service_uuid.lower() in [uuid.lower() for uuid in ad.service_uuids],
+            #    timeout=20.0
+            #)    
         
-            if device == None:
-                self.logger.log("No device found with service UUID: " + str(ble_uuid))
-                self.parent.window.after(0, self.parent.update_textbox, f"No device found with service UUID: {ble_uuid}.")
-            else:
+            #if device == None:
+            #    self.logger.log("No device found with service UUID: " + str(ble_uuid))
+            #    self.parent.window.after(0, self.parent.update_textbox, f"No device found with service UUID: {ble_uuid}.")
+            #else:
                 
             
-                self.logger.log("Client found, " + str(ble_uuid) + ", connecting")
+                #self.logger.log("Client found, " + str(ble_uuid) + ", connecting")
                 #self.parent.window.after(0, self.parent.update_textbox, "Client found," + str(ble_uuid) + ", connecting")
 
-                async with BleakClient(device) as client:
-                    self.characteristic_uuid = self._dynamic_char_search(client)
-                    
-                    if self.characteristic_uuid is None:
-                        self.logger.log("COnnection failed: No characteristic with notify found.")
-                        self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found.")
-                        return 
+            self.logger.log(f"Attempting to connect to device: {self.selected_device.name} with address: {self.selected_device.address}.")
+            self.parent.window.after(0, self.parent.update_textbox, f"Attempting to connect to device: {self.selected_device.name} with address: {self.selected_device.address}.")
 
-                    self.logger.log(f"Connected to device, found notify characteristic: {self.characteristic_uuid}.") 
-                    self.parent.window.after(0, self.parent.update_textbox, f"Connected to device, found notify characteristic: {self.characteristic_uuid}.")    
+            async with BleakClient(self.selected_device) as client:
+                self.characteristic_uuid = self._dynamic_char_search(client)
+                    
+                if self.characteristic_uuid is None:
+                    self.logger.log("COnnection failed: No characteristic with notify found.")
+                    self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found.")
+                    return 
+
+                self.logger.log(f"Connected to device, found notify characteristic: {self.characteristic_uuid}.") 
+                self.parent.window.after(0, self.parent.update_textbox, f"Connected to device, found notify characteristic: {self.characteristic_uuid}.")    
 
                     
-                    self.logger.log("Connected connection status: " + str(client.is_connected))
-                    self.parent.window.after(0, self.parent.update_textbox, f"Connected, connection status: {client.is_connected}.")
+                self.logger.log("Connected connection status: " + str(client.is_connected))
+                self.parent.window.after(0, self.parent.update_textbox, f"Connected, connection status: {client.is_connected}.")
                     
-                    await asyncio.sleep(2.0)
-                    await client.start_notify(self.characteristic_uuid, self._notify_handler)
+                await asyncio.sleep(2.0)
+                await client.start_notify(self.characteristic_uuid, self._notify_handler)
                     
-                    self.logger.log("Characteristic found")
-                    self.parent.window.after(0, self.parent.update_textbox, "Characteristic found.")
+                self.logger.log("Characteristic found")
+                self.parent.window.after(0, self.parent.update_textbox, "Characteristic found.")
                     
-                    units_task = asyncio.create_task(self._trigger_1s())
+                units_task = asyncio.create_task(self._trigger_1s())
 
-                    self.connected = True
-                    while self.connected:
-                        await asyncio.sleep(0.5)
+                self.connected = True
+                while self.connected:
+                    await asyncio.sleep(0.5)
 
-                    units_task.cancel()
+                units_task.cancel()
 
                 
-                self.logger.log("Disconnected from: " + str(ble_uuid))
-                self.parent.window.after(0, self.parent.update_textbox, f"Disconnected from: {ble_uuid}.") 
+            self.logger.log("Disconnected from: " + str(ble_uuid))
+            self.parent.window.after(0, self.parent.update_textbox, f"Disconnected from: {ble_uuid}.") 
         
         except Exception as e:
             self.logger.log("Error connection lost or failed: " +  str(e))
