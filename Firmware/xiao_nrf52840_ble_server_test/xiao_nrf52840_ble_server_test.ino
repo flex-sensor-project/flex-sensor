@@ -20,7 +20,7 @@ void setup() {
   Bluefruit.begin();
   Bluefruit.setName("XIAO_Sensor");
 
-  Bluefruit.Periph.setConnInterval(6,12);
+  Bluefruit.Periph.setConnInterval(12,24);
 
   // Setup the Service
   gloveService.begin();
@@ -66,7 +66,7 @@ void loop() {
 
     gloveCharacteristics.notify(fingers, sizeof(fingers));
 
-    delay(25);
+    delay(5);
     // Generate a random temperature between 20 and 30
     /*
     int randomTemp = random(20, 31);

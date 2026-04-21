@@ -174,8 +174,13 @@ class BleakDriver:
             self.parent.window.after(0, self.parent.update_textbox, f"Attempting to connect to device: {self.selected_device.name} with address: {self.selected_device.address}.")
 
             async with BleakClient(self.selected_device) as client:
+                
+                await client.pair()
+                
                 self.characteristic_uuid = self._dynamic_char_search(client)
-                    
+
+
+
                 if self.characteristic_uuid is None:
                     self.logger.log("COnnection failed: No characteristic with notify found.")
                     self.parent.window.after(0, self.parent.update_textbox, "Connection failed: No characteristic with notify found.")
