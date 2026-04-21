@@ -1,8 +1,14 @@
-To compile python script run:
+To install dependencies run:
 
 ```bash
 pip install PyInstaller
 pip install bleak
+pip install numpy
+```
+
+To compile python script run:
+
+```
 py -m PyInstaller --onefile --noconsole --windowed glove_driver.py
 ```
 
