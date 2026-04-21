@@ -7,6 +7,8 @@ BLEUuid chr_uuid = BLEUuid("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 BLEService gloveService(svc_uuid);
 BLECharacteristic gloveCharacteristics(chr_uuid);
 
+BLEHidGamepad blehid;
+
 char sendBuffer[64];
 
 
@@ -20,14 +22,15 @@ void setup() {
   Bluefruit.begin();
   Bluefruit.setName("XIAO_Sensor");
 
-  Bluefruit.Periph.setConnInterval(12,24);
+  Bluefruit.Periph.setConnInterval(6,12);
+  blehid.begin();
 
   // Setup the Service
   gloveService.begin();
 
   // Setup the Characteristic with Read and Notify properties
   gloveCharacteristics.setProperties(CHR_PROPS_READ | CHR_PROPS_NOTIFY);
-  gloveCharacteristics.setPermission(SECMODE_OPEN, SECMODE_NO_ACCESS);
+  gloveCharacteristics.setPermission(SECMODE_ENC_NO_MITM, SECMODE_NO_ACCESS);
   gloveCharacteristics.setMaxLen(10);
   gloveCharacteristics.begin();
 
@@ -41,8 +44,13 @@ void setup() {
   // Configure and start advertising
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addTxPower();
+  
+  
   Bluefruit.Advertising.addService(gloveService);
   Bluefruit.Advertising.addName();
+  
+  Bluefruit.Advertising.addService(blehid);
+
   Bluefruit.Advertising.restartOnDisconnect(true);
   
   // 0 means it will advertise forever without timing out

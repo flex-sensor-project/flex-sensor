@@ -175,7 +175,7 @@ class BleakDriver:
 
             async with BleakClient(self.selected_device) as client:
                 
-                self.logger.log("Connected, now pairing...")
+                self.logger.log("Connected, now pairing")
                 self.parent.window.after(0, self.parent.update_textbox, "Connected, now pairing")
                 await client.pair()
                 
