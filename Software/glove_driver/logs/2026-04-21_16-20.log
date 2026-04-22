@@ -1,0 +1,22 @@
+Log started at 2026-04-21 16:20:08.952917
+16:20:09 - BleakDriver initialized
+16:20:10 - Started BLE scan thread
+16:20:21 - Started BLE thread
+16:20:21 - Attempting to connect to device: XIAO_ with address: E8:B4:F1:B7:D1:66.
+16:20:24 - Connected, now pairing...
+16:20:25 - Connected to device, found notify characteristic: beb5483e-36e1-4688-b7f5-ea07361b26a8.
+16:20:25 - Connected connection status: True
+16:20:27 - Characteristic found
+16:20:28 - Units per second: 28.
+16:20:29 - Units per second: 28.
+16:20:30 - Units per second: 29.
+16:20:31 - Units per second: 29.
+16:20:32 - Units per second: 30.
+16:20:33 - Units per second: 31.
+16:20:34 - Units per second: 29.
+16:20:35 - Units per second: 32.
+16:20:36 - Units per second: 27.
+16:20:37 - BLE disconnect requested
+16:20:37 - Units per second: 28.
+16:20:37 - Disconnected from: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+16:20:37 - BLE connection task ended, can connect again.
