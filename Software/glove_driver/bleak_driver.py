@@ -110,12 +110,16 @@ class BleakDriver:
             values = struct.unpack('<5H', data)
         
             self.parent.latest_raw_data = values
+
             if self.is_calibrated:
 
                 self.packet_buffer.append(values)
             
                 cal_temp = self.parent.processor.process(values)
                 processed_values = (cal_temp["thumb"], cal_temp["index"], cal_temp["middle"], cal_temp["ring"], cal_temp["pinky"])
+                
+                self.parent.latest_processed_data = processed_values
+                
                 self.send_to_unity(processed_values)
             
                 self.ble_unit_count += 1
@@ -141,8 +145,9 @@ class BleakDriver:
                 if self.connected == True:
                     if self.is_calibrated:
                         if len(self.packet_buffer) > 0:
-                            batch = self.packet_buffer
-                            self.packet_buffer = []
+                            # atomic swap to fix
+                            batch, self.packet_buffer = self.packet_buffer, []
+
 
                             self.parent.window.after(0, self.parent.update_raw, batch)
 
@@ -231,7 +236,7 @@ class BleakDriver:
                 units_task = asyncio.create_task(self._trigger_1s())
 
                 self.connected = True
-                while self.connected:
+                while self.connected and client.is_connected:
                     await asyncio.sleep(0.5)
 
                 units_task.cancel()

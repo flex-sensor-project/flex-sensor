@@ -6,6 +6,8 @@ from GloveDataProcessor import GloveDataProcessor
 
 import time
 
+import threading
+
 class windowGui:
     
 
@@ -14,6 +16,7 @@ class windowGui:
 
         self.processor = GloveDataProcessor()
         self.latest_raw_data = None
+        self.latest_processed_data = None
 
         self.textbox_raw = tk.Text(self.window, height=36, width=46)
        
@@ -74,18 +77,38 @@ class windowGui:
 
     def update_raw(self, data):
         
-    
-        fixed_units = []
-        for unit in data:
-            temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
-            fixed_units.append(temp)
+        if not data:
+            return
+
+        latest_packet = data[-1]
+        
+        raw_str = f"Live ADC:{latest_packet[0]},{latest_packet[1]},{latest_packet[2]},{latest_packet[3]},{latest_packet[4]}"
+        proc_str = ""
+
+        if self.latest_processed_data is not None:
+            proc_str = f"Processed:{self.latest_processed_data[0]},{self.latest_processed_data[1]},{self.latest_processed_data[2]},{self.latest_processed_data[3]},{self.latest_processed_data[4]}"
+        else:
+            proc_str = "Processed: N/A"
+        
+        formatted_text = f"{raw_str}\n{proc_str}\n\n"
+        
         self.textbox_raw.config(state="normal")
         self.textbox_raw.delete("1.0", tk.END)
-
-        formatted_units = "\n".join(fixed_units)
-
-        self.textbox_raw.insert(tk.END, formatted_units)
+        self.textbox_raw.insert(tk.END, formatted_text)
         self.textbox_raw.config(state="disabled")
+
+        
+        #fixed_units = []
+        #for unit in data:
+        #    temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
+        #    fixed_units.append(temp)
+        #self.textbox_raw.config(state="normal")
+        #self.textbox_raw.delete("1.0", tk.END)
+
+        #formatted_units = "\n".join(fixed_units)
+
+        #self.textbox_raw.insert(tk.END, formatted_units)
+        #self.textbox_raw.config(state="disabled")
 
     def show_calibration_warning(self):
         self.textbox_raw.config(state="normal")
@@ -131,6 +154,8 @@ class windowGui:
         return
     
     def _on_button_click_calibrate(self):
+        self.button_calibrate.config(state="disabled")
+
         self.processor.calibrateAgain()
 
         self.bd.is_calibrated = False
@@ -146,49 +171,61 @@ class windowGui:
         
         instruction_label.pack(expand=True)
 
+        
+        cal_thread = threading.Thread(target=self._task_calibration, args=(modal, instruction_label))
+
+        cal_thread.start()
+
+    def _task_calibration(self, modal, instruction_label):
         poses = [0, 25, 50, 75, 100]
         
+
         for pose in poses:
-            modal.configure(bg="orange")
-            instruction_label.configure(bg="orange")
-            
+            self.window.after(0, lambda: modal.configure(bg="orange"))
+            self.window.after(0, lambda: instruction_label.configure(bg="orange"))
+
             for i in range (5, 0, -1):
-                instruction_label.configure(text=f"Get ready for {pose}%\nCapturing in {i}...")
-                modal.update()
+                text = f"Move Hand to {pose}%\nCapturing in {i}"
+                self.window.after(0, lambda t=text: instruction_label.configure(text=t))
                 time.sleep(1)
             
+            self.latest_raw_data = None
+            timeout = 0.5
+            start_wait = time.time()
+            
+            while self.latest_raw_data is None and (time.time() - start_wait) < timeout:
+                time.sleep(0.001)
 
             if self.latest_raw_data is None:
-                modal.configure(bg="red")
-                instruction_label.configure(text="Error: No data received.", bg="red")
-                modal.update()
+                self.window.after(0, lambda: modal.configure(bg="red"))
+                self.window.after(0, lambda: instruction_label.configure(text="Error: No data received or glove disconnected.", bg="red"))
                 time.sleep(3)
-                modal.destroy()
+                self.window.after(0, modal.destroy)
+                self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
                 return
             
             result = self.processor.addCalibrationPointAllFingers(self.latest_raw_data)
 
             if result["status"] != 0:
-                modal.configure(bg="red")
-                instruction_label.configure(text=f"Error: {result['message']}", bg="red")
-                modal.update()
+                self.window.after(0, lambda: modal.configure(bg="red"))
+                self.window.after(0, lambda msg=result['message']: instruction_label.configure(text=f"Error: {msg}", bg="red"))
                 time.sleep(3)
-                modal.destroy()
+                self.window.after(0, modal.destroy)
+                self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
                 return
 
-            modal.configure(bg="green")
-            instruction_label.configure(text="Successfully captured!", bg="green")
-            modal.update()
+            self.window.after(0, lambda: modal.configure(bg="green"))
+            self.window.after(0, lambda p=pose: instruction_label.configure(text=f"Successfully captured {p}%", bg="green"))
             time.sleep(2)
 
-        modal.configure(bg="green")
-        instruction_label.configure(text="Calibration complete!", bg="green")
-        modal.update()
-
+        self.window.after(0, lambda: modal.configure(bg="green"))
+        self.window.after(0, lambda: instruction_label.configure(text="Calibration completely finished!", bg="green"))
+        
         self.bd.is_calibrated = True
 
         time.sleep(3)
-        modal.destroy()
+        self.window.after(0, modal.destroy)
+        self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
         #self.window.after(0, modal.destroy)
 
         return
