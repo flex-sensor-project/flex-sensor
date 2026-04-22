@@ -1,9 +1,8 @@
+using System.Diagnostics;
 using UnityEngine;
 
 public class HandBoneController : MonoBehaviour
 {
-    public GloveReceiver receiver;
-
     [System.Serializable]
     public class FingerBones
     {
@@ -52,6 +51,8 @@ public class HandBoneController : MonoBehaviour
     [Header("Pinky")]
     public FingerBones pinky;
 
+    public GloveReceiver receiver;
+
     private void Start()
     {
         SaveStartRotations(thumb);
@@ -68,6 +69,7 @@ public class HandBoneController : MonoBehaviour
         middle.firstAngle = receiver.fingerData[2];
         ring.firstAngle = receiver.fingerData[3];
         pinky.firstAngle = receiver.fingerData[4];
+        
         ApplyFingerRotation(thumb);
         ApplyFingerRotation(index);
         ApplyFingerRotation(middle);
