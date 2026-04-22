@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 
 from bleak_driver import BleakDriver
+from GloveDataProcessor import GloveDataProcessor
+
+import time
+
+import threading
 
 class windowGui:
     
@@ -9,15 +14,18 @@ class windowGui:
     def __init__(self):
         self.window = tk.Tk()
 
+        self.processor = GloveDataProcessor()
+        self.latest_raw_data = None
+        self.latest_processed_data = None
 
-        self.textbox_raw = tk.Text(self.window, height=36, width=40)
+        self.textbox_raw = tk.Text(self.window, height=36, width=46)
        
         self.bd = BleakDriver(self)
         self.selected_index = None
 
         self.window.title("Glove driver")
-        self.window.geometry("350x680")
-        self.window.minsize(350, 680)
+        self.window.geometry("450x680")
+        self.window.minsize(450, 680)
 
         self.combobox_devices = tk.ttk.Combobox(self.window, state="readonly")
         self.combobox_devices.bind("<<ComboboxSelected>>", self._on_combobox_select)
@@ -25,7 +33,8 @@ class windowGui:
         self.button_scan = tk.Button(self.window, text="scan", command=self.bd.scan)
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
         self.button_disconnect = tk.Button(self.window, text="disconnect", command=self._on_button_click_disconnect)
-       
+        self.button_calibrate = tk.Button(self.window, text="calibrate", command=self._on_button_click_calibrate, state="disabled")  
+
         self.label_units = tk.Label(self.window, text="Units:")
         self.label_combobox = tk.Label(self.window, text="Select device:")
 
@@ -68,16 +77,43 @@ class windowGui:
 
     def update_raw(self, data):
         
-        fixed_units = []
-        for unit in data:
-            temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
-            fixed_units.append(temp)
+        if not data:
+            return
+
+        latest_packet = data[-1]
+        
+        raw_str = f"Live ADC:{latest_packet[0]},{latest_packet[1]},{latest_packet[2]},{latest_packet[3]},{latest_packet[4]}"
+        proc_str = ""
+
+        if self.latest_processed_data is not None:
+            proc_str = f"Processed:{self.latest_processed_data[0]},{self.latest_processed_data[1]},{self.latest_processed_data[2]},{self.latest_processed_data[3]},{self.latest_processed_data[4]}"
+        else:
+            proc_str = "Processed: N/A"
+        
+        formatted_text = f"{raw_str}\n{proc_str}\n\n"
+        
         self.textbox_raw.config(state="normal")
         self.textbox_raw.delete("1.0", tk.END)
+        self.textbox_raw.insert(tk.END, formatted_text)
+        self.textbox_raw.config(state="disabled")
 
-        formatted_units = "\n".join(fixed_units)
+        
+        #fixed_units = []
+        #for unit in data:
+        #    temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
+        #    fixed_units.append(temp)
+        #self.textbox_raw.config(state="normal")
+        #self.textbox_raw.delete("1.0", tk.END)
 
-        self.textbox_raw.insert(tk.END, formatted_units)
+        #formatted_units = "\n".join(fixed_units)
+
+        #self.textbox_raw.insert(tk.END, formatted_units)
+        #self.textbox_raw.config(state="disabled")
+
+    def show_calibration_warning(self):
+        self.textbox_raw.config(state="normal")
+        self.textbox_raw.delete("1.0", tk.END)
+        self.textbox_raw.insert(tk.END, "Please calibrate the glove to see processed data.\n")
         self.textbox_raw.config(state="disabled")
 
 
@@ -104,7 +140,8 @@ class windowGui:
         else:
             self.button_connect.config(state="disabled")
             self.button_disconnect.config(state="normal")
-            
+            self.button_calibrate.config(state="normal")
+
             self.bd.connect()
 
         return
@@ -113,8 +150,87 @@ class windowGui:
         self.bd.disconnect()
         self.button_connect.config(state="normal")
         self.button_disconnect.config(state="disabled")
+        self.button_calibrate.config(state="disabled")
         return
     
+    def _on_button_click_calibrate(self):
+        self.button_calibrate.config(state="disabled")
+
+        self.processor.calibrateAgain()
+
+        self.bd.is_calibrated = False
+
+        modal = tk.Toplevel(self.window)
+        modal.title("Calibration")
+        modal.geometry("300x200")
+        modal.configure(bg="orange")
+
+        modal.grab_set()
+
+        instruction_label = tk.Label(modal, text="Ready to calibrate",font=("Arial", 14), bg="orange")
+        
+        instruction_label.pack(expand=True)
+
+        
+        cal_thread = threading.Thread(target=self._task_calibration, args=(modal, instruction_label))
+
+        cal_thread.start()
+
+    def _task_calibration(self, modal, instruction_label):
+        poses = [0, 25, 50, 75, 100]
+        
+
+        for pose in poses:
+            self.window.after(0, lambda: modal.configure(bg="orange"))
+            self.window.after(0, lambda: instruction_label.configure(bg="orange"))
+
+            for i in range (5, 0, -1):
+                text = f"Move Hand to {pose}%\nCapturing in {i}"
+                self.window.after(0, lambda t=text: instruction_label.configure(text=t))
+                time.sleep(1)
+            
+            self.latest_raw_data = None
+            timeout = 0.5
+            start_wait = time.time()
+            
+            while self.latest_raw_data is None and (time.time() - start_wait) < timeout:
+                time.sleep(0.001)
+
+            if self.latest_raw_data is None:
+                self.window.after(0, lambda: modal.configure(bg="red"))
+                self.window.after(0, lambda: instruction_label.configure(text="Error: No data received or glove disconnected.", bg="red"))
+                time.sleep(3)
+                self.window.after(0, modal.destroy)
+                self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
+                return
+            
+            result = self.processor.addCalibrationPointAllFingers(self.latest_raw_data)
+
+            if result["status"] != 0:
+                self.window.after(0, lambda: modal.configure(bg="red"))
+                self.window.after(0, lambda msg=result['message']: instruction_label.configure(text=f"Error: {msg}", bg="red"))
+                time.sleep(3)
+                self.window.after(0, modal.destroy)
+                self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
+                return
+
+            self.window.after(0, lambda: modal.configure(bg="green"))
+            self.window.after(0, lambda p=pose: instruction_label.configure(text=f"Successfully captured {p}%", bg="green"))
+            time.sleep(2)
+
+        self.window.after(0, lambda: modal.configure(bg="green"))
+        self.window.after(0, lambda: instruction_label.configure(text="Calibration completely finished!", bg="green"))
+        
+        self.bd.is_calibrated = True
+
+        time.sleep(3)
+        self.window.after(0, modal.destroy)
+        self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
+        #self.window.after(0, modal.destroy)
+
+        return
+    
+
     def _define_view(self):
         self.dyn_val_units.set("0")
 
@@ -128,6 +244,7 @@ class windowGui:
         self.button_scan.grid(row=1, column=2)
         self.button_connect.grid(row=1, column=3)
         self.button_disconnect.grid(row=1, column=4)
+        self.button_calibrate.grid(row=1, column=5)
 
         self.textbox_raw.grid(row=2, column=0, columnspan=5, pady=10)
 

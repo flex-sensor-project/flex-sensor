@@ -23,6 +23,8 @@ class BleakDriver:
         #self.service_uuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'   
         #self.characteristic_uuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
         
+    
+
         self.service_uuid = None
         self.characteristic_uuid = None
 
@@ -39,6 +41,8 @@ class BleakDriver:
         self.ble_unit_count = 0
         
         self.connected = False
+
+        self.is_calibrated = False
 
         self.udp_ip = "127.0.0.1"
         self.udp_port = 5005
@@ -105,11 +109,22 @@ class BleakDriver:
         if len(data) == 10:
             values = struct.unpack('<5H', data)
         
-            self.packet_buffer.append(values)
+            self.parent.latest_raw_data = values
+
+            if self.is_calibrated:
+
+                self.packet_buffer.append(values)
             
-            self.send_to_unity(values)
+                cal_temp = self.parent.processor.process(values)
+                processed_values = (cal_temp["thumb"], cal_temp["index"], cal_temp["middle"], cal_temp["ring"], cal_temp["pinky"])
+                
+                self.parent.latest_processed_data = processed_values
+                
+                self.send_to_unity(processed_values)
             
-            self.ble_unit_count += 1
+                self.ble_unit_count += 1
+
+
         #TODO implement validating received payload
         #if 'E' in self.notify_buffer :
             #if len(self.notify_buffer) < 25:
@@ -127,16 +142,21 @@ class BleakDriver:
             while True:
                 await asyncio.sleep(1.0)
 
-                if len(self.packet_buffer) > 0:
-                    batch = self.packet_buffer
-                    self.packet_buffer = []
+                if self.connected == True:
+                    if self.is_calibrated:
+                        if len(self.packet_buffer) > 0:
+                            # atomic swap to fix
+                            batch, self.packet_buffer = self.packet_buffer, []
 
-                    self.parent.window.after(0, self.parent.update_raw, batch)
+
+                            self.parent.window.after(0, self.parent.update_raw, batch)
 
                
-                self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
-                self.logger.log(f"Units per second: {self.ble_unit_count}.")
-                self.ble_unit_count = 0
+                        self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
+                        self.logger.log(f"Units per second: {self.ble_unit_count}.")
+                        self.ble_unit_count = 0
+                    else:
+                        self.parent.window.after(0, self.parent.show_calibration_warning)   
 
         except asyncio.CancelledError:
             pass
@@ -216,7 +236,7 @@ class BleakDriver:
                 units_task = asyncio.create_task(self._trigger_1s())
 
                 self.connected = True
-                while self.connected:
+                while self.connected and client.is_connected:
                     await asyncio.sleep(0.5)
 
                 units_task.cancel()
