@@ -1,8 +1,0 @@
-Log started at 2026-04-18 02:20:09.995276
-02:20:10 - BleakDriver initialized
-02:20:11 - Started BLE scan thread
-02:20:19 - Started BLE thread
-02:20:19 - Attempting to connect to device: XIAO_ with address: E8:B4:F1:B7:D1:66.
-02:21:43 - Error connection lost or failed: 
-02:21:43 - BLE connection task ended, can connect again.
-02:22:13 - Started BLE scan thread
