@@ -74,10 +74,7 @@ class windowGui:
 
     def update_raw(self, data):
         
-        #im not sure about this
-        if len(data) > 0:
-            self.latest_raw_data = data[-1]
-
+    
         fixed_units = []
         for unit in data:
             temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
@@ -88,6 +85,12 @@ class windowGui:
         formatted_units = "\n".join(fixed_units)
 
         self.textbox_raw.insert(tk.END, formatted_units)
+        self.textbox_raw.config(state="disabled")
+
+    def show_calibration_warning(self):
+        self.textbox_raw.config(state="normal")
+        self.textbox_raw.delete("1.0", tk.END)
+        self.textbox_raw.insert(tk.END, "Please calibrate the glove to see processed data.\n")
         self.textbox_raw.config(state="disabled")
 
 
@@ -130,6 +133,8 @@ class windowGui:
     def _on_button_click_calibrate(self):
         self.processor.calibrateAgain()
 
+        self.bd.is_calibrated = False
+
         modal = tk.Toplevel(self.window)
         modal.title("Calibration")
         modal.geometry("300x200")
@@ -163,6 +168,9 @@ class windowGui:
         
         modal.configure(bg="green")
         instruction_label.configure(text="Calibration complete!", bg="green")
+        
+        self.bd.is_calibrated = True
+
         time.sleep(2)
         self.window.after(0, modal.destroy)
 
