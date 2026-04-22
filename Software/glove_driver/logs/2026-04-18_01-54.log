@@ -1,0 +1,11 @@
+Log started at 2026-04-18 01:54:04.736778
+01:54:04 - BleakDriver initialized
+01:54:33 - Started BLE scan thread
+01:54:40 - Started BLE thread
+01:54:40 - Looking for Bluetooth LE device with service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b.
+01:55:00 - No device found with service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+01:55:00 - BLE connection task ended, can connect again.
+01:55:06 - Started BLE thread
+01:55:06 - Looking for Bluetooth LE device with service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b.
+01:55:26 - No device found with service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+01:55:26 - BLE connection task ended, can connect again.

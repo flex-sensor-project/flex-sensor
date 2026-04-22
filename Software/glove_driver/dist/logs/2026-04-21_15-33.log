@@ -1,0 +1,77 @@
+Log started at 2026-04-21 15:33:54.427251
+15:33:55 - BleakDriver initialized
+15:34:00 - Started BLE scan thread
+15:34:13 - Started BLE scan thread
+15:34:40 - Started BLE scan thread
+15:35:06 - Started BLE scan thread
+15:35:14 - Started BLE thread
+15:35:14 - Attempting to connect to device: XIAO_ with address: E8:B4:F1:B7:D1:66.
+15:35:18 - Connected to device, found notify characteristic: beb5483e-36e1-4688-b7f5-ea07361b26a8.
+15:35:18 - Connected connection status: True
+15:35:20 - Characteristic found
+15:35:21 - Units per second: 30.
+15:35:22 - Units per second: 27.
+15:35:23 - Units per second: 28.
+15:35:24 - Units per second: 29.
+15:35:25 - Units per second: 26.
+15:35:26 - Units per second: 26.
+15:35:27 - Units per second: 29.
+15:35:28 - Units per second: 32.
+15:35:29 - Units per second: 31.
+15:35:30 - Units per second: 27.
+15:35:31 - Units per second: 30.
+15:35:32 - Units per second: 30.
+15:35:33 - Units per second: 28.
+15:35:34 - Units per second: 30.
+15:35:35 - Units per second: 22.
+15:35:36 - Units per second: 28.
+15:35:37 - Units per second: 29.
+15:35:38 - Units per second: 32.
+15:35:39 - Units per second: 28.
+15:35:40 - Units per second: 35.
+15:35:41 - Units per second: 29.
+15:35:42 - Units per second: 28.
+15:35:43 - Units per second: 29.
+15:35:44 - Units per second: 28.
+15:35:45 - Units per second: 27.
+15:35:46 - Units per second: 31.
+15:35:47 - Units per second: 30.
+15:35:48 - Units per second: 26.
+15:35:50 - Units per second: 33.
+15:35:51 - Units per second: 32.
+15:35:52 - Units per second: 28.
+15:35:53 - Units per second: 30.
+15:35:54 - Units per second: 30.
+15:35:55 - Units per second: 27.
+15:35:56 - Units per second: 27.
+15:35:57 - Units per second: 29.
+15:35:58 - Units per second: 29.
+15:35:59 - Units per second: 28.
+15:36:00 - Units per second: 31.
+15:36:01 - Units per second: 28.
+15:36:02 - Units per second: 33.
+15:36:03 - Units per second: 32.
+15:36:04 - Units per second: 30.
+15:36:05 - Units per second: 29.
+15:36:06 - Units per second: 28.
+15:36:07 - Units per second: 28.
+15:36:08 - Units per second: 32.
+15:36:09 - Units per second: 32.
+15:36:10 - Units per second: 30.
+15:36:11 - Units per second: 34.
+15:36:12 - Units per second: 32.
+15:36:13 - Units per second: 31.
+15:36:14 - Units per second: 34.
+15:36:15 - Units per second: 31.
+15:36:16 - Units per second: 30.
+15:36:17 - Units per second: 29.
+15:36:18 - Units per second: 32.
+15:36:19 - Units per second: 30.
+15:36:20 - Units per second: 29.
+15:36:21 - Units per second: 31.
+15:36:22 - Units per second: 29.
+15:36:23 - Units per second: 31.
+15:36:23 - BLE disconnect requested
+15:36:23 - Disconnected from: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+15:36:23 - BLE connection task ended, can connect again.
+15:38:57 - Started BLE scan thread

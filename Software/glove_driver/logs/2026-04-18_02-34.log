@@ -1,0 +1,19 @@
+Log started at 2026-04-18 02:34:02.442493
+02:34:03 - BleakDriver initialized
+02:34:05 - Started BLE scan thread
+02:34:13 - Started BLE thread
+02:34:13 - Looking for Bluetooth LE device with service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+02:34:13 - Client found,4fafc201-1fb5-459e-8fcc-c5c9c331914b, connecting
+02:34:15 - Connected to device, found notify characteristic: beb5483e-36e1-4688-b7f5-ea07361b26a8
+02:34:15 - Connected connection status: True
+02:34:17 - Characteristic found
+02:34:19 - Units per second: 33
+02:34:20 - Units per second: 34
+02:34:21 - Units per second: 33
+02:34:22 - Units per second: 33
+02:34:23 - Units per second: 34
+02:34:24 - Units per second: 33
+02:34:24 - BLE disconnect requested
+02:34:25 - Units per second: 26
+02:34:25 - Disconnected from:4fafc201-1fb5-459e-8fcc-c5c9c331914b
+02:34:25 - BLE connection task ended, can connect again
