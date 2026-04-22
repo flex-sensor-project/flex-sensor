@@ -15,14 +15,14 @@ class windowGui:
         self.processor = GloveDataProcessor()
         self.latest_raw_data = None
 
-        self.textbox_raw = tk.Text(self.window, height=36, width=40)
+        self.textbox_raw = tk.Text(self.window, height=36, width=46)
        
         self.bd = BleakDriver(self)
         self.selected_index = None
 
         self.window.title("Glove driver")
-        self.window.geometry("350x680")
-        self.window.minsize(350, 680)
+        self.window.geometry("450x680")
+        self.window.minsize(450, 680)
 
         self.combobox_devices = tk.ttk.Combobox(self.window, state="readonly")
         self.combobox_devices.bind("<<ComboboxSelected>>", self._on_combobox_select)
@@ -30,7 +30,7 @@ class windowGui:
         self.button_scan = tk.Button(self.window, text="scan", command=self.bd.scan)
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
         self.button_disconnect = tk.Button(self.window, text="disconnect", command=self._on_button_click_disconnect)
-        self.button_calibrate = tk.Button(self.window, text="calibrate", command=self._on_button_click_calibrate)  
+        self.button_calibrate = tk.Button(self.window, text="calibrate", command=self._on_button_click_calibrate, state="disabled")  
 
         self.label_units = tk.Label(self.window, text="Units:")
         self.label_combobox = tk.Label(self.window, text="Select device:")
@@ -149,30 +149,47 @@ class windowGui:
         poses = [0, 25, 50, 75, 100]
         
         for pose in poses:
-            instruction_label.configure(text=f"Hold your hand at {pose}%")
-            modal.update()
-            time.sleep(1)
+            modal.configure(bg="orange")
+            instruction_label.configure(bg="orange")
+            
+            for i in range (5, 0, -1):
+                instruction_label.configure(text=f"Get ready for {pose}%\nCapturing in {i}...")
+                modal.update()
+                time.sleep(1)
+            
 
             if self.latest_raw_data is None:
                 modal.configure(bg="red")
                 instruction_label.configure(text="Error: No data received.", bg="red")
-                time.sleep(1)
+                modal.update()
+                time.sleep(3)
+                modal.destroy()
                 return
+            
             result = self.processor.addCalibrationPointAllFingers(self.latest_raw_data)
 
             if result["status"] != 0:
                 modal.configure(bg="red")
                 instruction_label.configure(text=f"Error: {result['message']}", bg="red")
-                time.sleep(1)
+                modal.update()
+                time.sleep(3)
+                modal.destroy()
                 return
-        
+
+            modal.configure(bg="green")
+            instruction_label.configure(text="Successfully captured!", bg="green")
+            modal.update()
+            time.sleep(2)
+
         modal.configure(bg="green")
         instruction_label.configure(text="Calibration complete!", bg="green")
-        
+        modal.update()
+
         self.bd.is_calibrated = True
 
-        time.sleep(2)
-        self.window.after(0, modal.destroy)
+        time.sleep(3)
+        modal.destroy()
+        #self.window.after(0, modal.destroy)
 
         return
     
