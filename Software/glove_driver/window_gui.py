@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 
 from bleak_driver import BleakDriver
+from GloveDataProcessor import GloveDataProcessor
+
+import time
 
 class windowGui:
     
@@ -9,6 +12,8 @@ class windowGui:
     def __init__(self):
         self.window = tk.Tk()
 
+        self.processor = GloveDataProcessor()
+        self.latest_raw_data = None
 
         self.textbox_raw = tk.Text(self.window, height=36, width=40)
        
@@ -25,7 +30,8 @@ class windowGui:
         self.button_scan = tk.Button(self.window, text="scan", command=self.bd.scan)
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
         self.button_disconnect = tk.Button(self.window, text="disconnect", command=self._on_button_click_disconnect)
-       
+        self.button_calibrate = tk.Button(self.window, text="calibrate", command=self._on_button_click_calibrate)  
+
         self.label_units = tk.Label(self.window, text="Units:")
         self.label_combobox = tk.Label(self.window, text="Select device:")
 
@@ -68,6 +74,10 @@ class windowGui:
 
     def update_raw(self, data):
         
+        #im not sure about this
+        if len(data) > 0:
+            self.latest_raw_data = data[-1]
+
         fixed_units = []
         for unit in data:
             temp = f"{unit[0]}, {unit[1]}, {unit[2]}, {unit[3]}, {unit[4]}"
@@ -104,7 +114,8 @@ class windowGui:
         else:
             self.button_connect.config(state="disabled")
             self.button_disconnect.config(state="normal")
-            
+            self.button_calibrate.config(state="normal")
+
             self.bd.connect()
 
         return
@@ -113,8 +124,51 @@ class windowGui:
         self.bd.disconnect()
         self.button_connect.config(state="normal")
         self.button_disconnect.config(state="disabled")
+        self.button_calibrate.config(state="disabled")
         return
     
+    def _on_button_click_calibrate(self):
+        self.processor.calibrateAgain()
+
+        modal = tk.Toplevel(self.window)
+        modal.title("Calibration")
+        modal.geometry("300x200")
+        modal.configure(bg="orange")
+
+        modal.grab_set()
+
+        instruction_label = tk.Label(modal, text="Ready to calibrate",font=("Arial", 14), bg="orange")
+        
+        instruction_label.pack(expand=True)
+
+        poses = [0, 25, 50, 75, 100]
+        
+        for pose in poses:
+            instruction_label.configure(text=f"Hold your hand at {pose}%")
+            modal.update()
+            time.sleep(1)
+
+            if self.latest_raw_data is None:
+                modal.configure(bg="red")
+                instruction_label.configure(text="Error: No data received.", bg="red")
+                time.sleep(1)
+                return
+            result = self.processor.addCalibrationPointAllFingers(self.latest_raw_data)
+
+            if result["status"] != 0:
+                modal.configure(bg="red")
+                instruction_label.configure(text=f"Error: {result['message']}", bg="red")
+                time.sleep(1)
+                return
+        
+        modal.configure(bg="green")
+        instruction_label.configure(text="Calibration complete!", bg="green")
+        time.sleep(2)
+        self.window.after(0, modal.destroy)
+
+        return
+    
+
     def _define_view(self):
         self.dyn_val_units.set("0")
 
@@ -128,6 +182,7 @@ class windowGui:
         self.button_scan.grid(row=1, column=2)
         self.button_connect.grid(row=1, column=3)
         self.button_disconnect.grid(row=1, column=4)
+        self.button_calibrate.grid(row=1, column=5)
 
         self.textbox_raw.grid(row=2, column=0, columnspan=5, pady=10)
 
