@@ -15,6 +15,8 @@ from logger import Logger
 import socket
 import struct
 
+import time
+
 class BleakDriver:
 
     logger = Logger()
@@ -36,6 +38,7 @@ class BleakDriver:
 
         self.packet_buffer = []
 
+        self.last_packet_time = 0.0
 
         self.parent = parent
         self.ble_unit_count = 0
@@ -106,9 +109,15 @@ class BleakDriver:
         self.sock.sendto(message.encode('utf-8'), (self.udp_ip, self.udp_port))    
 
     def _notify_handler(self, sender, data):
+        current_time = time.perf_counter()
+
+        if(current_time - self.last_packet_time) < 0.005:
+            return
+        
         if len(data) == 10:
             values = struct.unpack('<5H', data)
         
+
             self.parent.latest_raw_data = values
 
             if self.is_calibrated:
