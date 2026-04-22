@@ -12,6 +12,8 @@ from bleak.exc import BleakError
 
 from logger import Logger
 
+import socket
+import struct
 
 class BleakDriver:
 
@@ -37,6 +39,10 @@ class BleakDriver:
         self.ble_unit_count = 0
         
         self.connected = False
+
+        self.udp_ip = "127.0.0.1"
+        self.udp_port = 5005
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.logger.log("BleakDriver initialized")
         self.parent.update_textbox("BleakDriver initialized.")
@@ -90,13 +96,19 @@ class BleakDriver:
         # This runs the async loop in the background thread
         asyncio.run(self._main_connect(self.service_uuid))
 
-    
+    def send_to_unity(self, sensor_values):
+        message = f"{sensor_values[0]},{sensor_values[1]},{sensor_values[2]},{sensor_values[3]},{sensor_values[4]}"
+        
+        self.sock.sendto(message.encode('utf-8'), (self.udp_ip, self.udp_port))    
+
     def _notify_handler(self, sender, data):
-    
         if len(data) == 10:
             values = struct.unpack('<5H', data)
         
             self.packet_buffer.append(values)
+            
+            self.send_to_unity(values)
+            
             self.ble_unit_count += 1
         #TODO implement validating received payload
         #if 'E' in self.notify_buffer :
