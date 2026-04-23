@@ -114,7 +114,12 @@ class BleakDriver:
         if(current_time - self.last_packet_time) < 0.005:
             return
         
-        if len(data) == 10:
+        self.last_packet_time = current_time
+
+        if len(data) != 10:
+            self.logger.log(f"Received data of unexpected length: {len(data)} bytes. Expected 10 bytes.")
+            return
+        else:
             values = struct.unpack('<5H', data)
         
 
@@ -216,9 +221,9 @@ class BleakDriver:
 
             async with BleakClient(self.selected_device) as client:
                 
-                self.logger.log("Connected, now pairing")
-                self.parent.window.after(0, self.parent.update_textbox, "Connected, now pairing")
-                await client.pair()
+                #self.logger.log("Connected, now pairing")
+                #self.parent.window.after(0, self.parent.update_textbox, "Connected, now pairing")
+                #await client.pair()
                 
                 self.characteristic_uuid = self._dynamic_char_search(client)
 

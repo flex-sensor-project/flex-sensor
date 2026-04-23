@@ -8,8 +8,11 @@ import time
 
 import threading
 
+from logger import Logger
+
 class windowGui:
     
+    logger = Logger()
 
     def __init__(self):
         self.window = tk.Tk()
@@ -82,11 +85,14 @@ class windowGui:
 
         latest_packet = data[-1]
         
-        raw_str = f"Live ADC:{latest_packet[0]},{latest_packet[1]},{latest_packet[2]},{latest_packet[3]},{latest_packet[4]}"
+        raw_vals = latest_packet[0]
+        proc_vals = latest_packet[1]
+
+        raw_str = f"Live ADC:{raw_vals[0]},{raw_vals[1]},{raw_vals[2]},{raw_vals[3]},{raw_vals[4]}"
         proc_str = ""
 
-        if self.latest_processed_data is not None:
-            proc_str = f"Processed:{self.latest_processed_data[0]},{self.latest_processed_data[1]},{self.latest_processed_data[2]},{self.latest_processed_data[3]},{self.latest_processed_data[4]}"
+        if proc_vals is not None:
+            proc_str = f"Processed:{proc_vals[0]},{proc_vals[1]},{proc_vals[2]},{proc_vals[3]},{proc_vals[4]}"
         else:
             proc_str = "Processed: N/A"
         
@@ -179,7 +185,8 @@ class windowGui:
     def _task_calibration(self, modal, instruction_label):
         poses = [0, 25, 50, 75, 100]
         
-
+        self.logger.log("Starting calibration process")
+        
         for pose in poses:
             self.window.after(0, lambda: modal.configure(bg="orange"))
             self.window.after(0, lambda: instruction_label.configure(bg="orange"))
@@ -193,10 +200,13 @@ class windowGui:
             timeout = 0.5
             start_wait = time.time()
             
+            self.logger.log(f"Waiting for data for pose {pose}%.")
+
             while self.latest_raw_data is None and (time.time() - start_wait) < timeout:
                 time.sleep(0.001)
 
             if self.latest_raw_data is None:
+                self.logger.log(f"Error: No data received for pose {pose}%. Calibration failed.")
                 self.window.after(0, lambda: modal.configure(bg="red"))
                 self.window.after(0, lambda: instruction_label.configure(text="Error: No data received or glove disconnected.", bg="red"))
                 time.sleep(3)
@@ -204,7 +214,11 @@ class windowGui:
                 self.window.after(0, lambda: self.button_calibrate.config(state="normal"))
                 return
             
+            self.logger.log(f"Data received for pose {pose}%: {self.latest_raw_data}")
+
             result = self.processor.addCalibrationPointAllFingers(self.latest_raw_data)
+
+            self.logger.log(f"Calibration result for pose {pose}%: {result}")
 
             if result["status"] != 0:
                 self.window.after(0, lambda: modal.configure(bg="red"))
@@ -218,6 +232,7 @@ class windowGui:
             self.window.after(0, lambda p=pose: instruction_label.configure(text=f"Successfully captured {p}%", bg="green"))
             time.sleep(2)
 
+        self.logger.log("Calibration process completed successfully.")
         self.window.after(0, lambda: modal.configure(bg="green"))
         self.window.after(0, lambda: instruction_label.configure(text="Calibration completely finished!", bg="green"))
         
