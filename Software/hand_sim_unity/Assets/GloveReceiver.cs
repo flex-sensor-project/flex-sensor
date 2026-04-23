@@ -9,7 +9,7 @@ public class GloveReceiver : MonoBehaviour
 {
     Thread receiveThread;
     UdpClient client;
-    public int port = 5005;
+    public int port = 5006;
 
     public float[] fingerData = new float[5];
 
@@ -54,6 +54,22 @@ public class GloveReceiver : MonoBehaviour
     void OnApplicationQuit()
     {
         isRunning = false;
+		if(client != null){
+			client.Close();
+			client = null;
+			
+		}
+        if (receiveThread != null) receiveThread.Abort();
+        if (client != null) client.Close();
+    }
+	
+	void onDestroy(){
+        isRunning = false;
+		if(client != null){
+			client.Close();
+			client = null;
+			
+		}
         if (receiveThread != null) receiveThread.Abort();
         if (client != null) client.Close();
     }

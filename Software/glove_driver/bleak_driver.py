@@ -48,7 +48,7 @@ class BleakDriver:
         self.is_calibrated = False
 
         self.udp_ip = "127.0.0.1"
-        self.udp_port = 5005
+        self.udp_port = 5006
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.logger.log("BleakDriver initialized")
