@@ -68,6 +68,18 @@ public class HandBoneController : MonoBehaviour
         middle.firstAngle = receiver.fingerData[2];
         ring.firstAngle = receiver.fingerData[3];
         pinky.firstAngle = receiver.fingerData[4];
+
+        thumb.secondAngle = receiver.fingerData[0];
+        index.secondAngle = receiver.fingerData[1];
+        middle.secondAngle = receiver.fingerData[2];
+        ring.secondAngle = receiver.fingerData[3];
+        pinky.secondAngle = receiver.fingerData[4];
+
+        thumb.thirdAngle = receiver.fingerData[0];
+        index.thirdAngle = receiver.fingerData[1];
+        middle.thirdAngle = receiver.fingerData[2];
+        ring.thirdAngle = receiver.fingerData[3];
+        pinky.thirdAngle = receiver.fingerData[4];
         ApplyFingerRotation(thumb);
         ApplyFingerRotation(index);
         ApplyFingerRotation(middle);
