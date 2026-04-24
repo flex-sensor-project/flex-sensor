@@ -63,23 +63,30 @@ public class HandBoneController : MonoBehaviour
 
     private void Update()
     {
-        thumb.firstAngle = receiver.fingerData[0];
-        index.firstAngle = receiver.fingerData[1];
-        middle.firstAngle = receiver.fingerData[2];
-        ring.firstAngle = receiver.fingerData[3];
-        pinky.firstAngle = receiver.fingerData[4];
+		float bendthumb = receiver.fingerData[0];
+		float bendindex = receiver.fingerData[1];
+		float bendmiddle = receiver.fingerData[2];
+		float bendring = receiver.fingerData[3];
+		float bendpinky = receiver.fingerData[4];
+		
+		thumb.firstAngle = bendthumb ;
+        index.firstAngle = bendindex ;
+        middle.firstAngle = bendmiddle ;
+        ring.firstAngle = bendring ;
+        pinky.firstAngle = bendpinky ;
 
-        thumb.secondAngle = receiver.fingerData[0];
-        index.secondAngle = receiver.fingerData[1];
-        middle.secondAngle = receiver.fingerData[2];
-        ring.secondAngle = receiver.fingerData[3];
-        pinky.secondAngle = receiver.fingerData[4];
+        thumb.secondAngle = Mathf.Max(0,bendthumb - 30f) ;
+        index.secondAngle = Mathf.Max(0, bendindex -30f);
+        middle.secondAngle = Mathf.Max(0, bendmiddle -30f);
+        ring.secondAngle = Mathf.Max(0, bendring - 30f);
+        pinky.secondAngle = Mathf.Max(0, bendpinky -30f);
 
-        thumb.thirdAngle = receiver.fingerData[0];
-        index.thirdAngle = receiver.fingerData[1];
-        middle.thirdAngle = receiver.fingerData[2];
-        ring.thirdAngle = receiver.fingerData[3];
-        pinky.thirdAngle = receiver.fingerData[4];
+        thumb.thirdAngle = Mathf.Max(0, bendthumb -60f);
+        index.thirdAngle = Mathf.Max(0, bendindex -60f);
+        middle.thirdAngle = Mathf.Max(0, bendmiddle -60f);
+        ring.thirdAngle = Mathf.Max(0, bendring -60f);
+        pinky.thirdAngle = Mathf.Max(0, bendpinky -60f) ;
+		
         ApplyFingerRotation(thumb);
         ApplyFingerRotation(index);
         ApplyFingerRotation(middle);
