@@ -13,9 +13,9 @@ public class HandBoneController : MonoBehaviour
         public Transform thirdBone;
 
         [Header("Current bend values")]
-        [Range(-120f, 120f)] public float firstAngle;
-        [Range(-120f, 120f)] public float secondAngle;
-        [Range(-120f, 120f)] public float thirdAngle;
+        [Range(0f, 120f)] public float firstAngle;
+        [Range(0f, 120f)] public float secondAngle;
+        [Range(0f, 120f)] public float thirdAngle;
 
         [Header("Rotation axis")]
         public FingerRotationAxis bendAxis = FingerRotationAxis.X;
@@ -63,11 +63,30 @@ public class HandBoneController : MonoBehaviour
 
     private void Update()
     {
-        thumb.firstAngle = receiver.fingerData[0];
-        index.firstAngle = receiver.fingerData[1];
-        middle.firstAngle = receiver.fingerData[2];
-        ring.firstAngle = receiver.fingerData[3];
-        pinky.firstAngle = receiver.fingerData[4];
+		float bendthumb = receiver.fingerData[0];
+		float bendindex = receiver.fingerData[1];
+		float bendmiddle = receiver.fingerData[2];
+		float bendring = receiver.fingerData[3];
+		float bendpinky = receiver.fingerData[4];
+		
+		thumb.firstAngle = bendthumb ;
+        index.firstAngle = bendindex ;
+        middle.firstAngle = bendmiddle ;
+        ring.firstAngle = bendring ;
+        pinky.firstAngle = bendpinky ;
+
+        thumb.secondAngle = Mathf.Max(0,bendthumb - 30f) ;
+        index.secondAngle = Mathf.Max(0, bendindex -30f);
+        middle.secondAngle = Mathf.Max(0, bendmiddle -30f);
+        ring.secondAngle = Mathf.Max(0, bendring - 30f);
+        pinky.secondAngle = Mathf.Max(0, bendpinky -30f);
+
+        thumb.thirdAngle = Mathf.Max(0, bendthumb -60f);
+        index.thirdAngle = Mathf.Max(0, bendindex -60f);
+        middle.thirdAngle = Mathf.Max(0, bendmiddle -60f);
+        ring.thirdAngle = Mathf.Max(0, bendring -60f);
+        pinky.thirdAngle = Mathf.Max(0, bendpinky -60f) ;
+		
         ApplyFingerRotation(thumb);
         ApplyFingerRotation(index);
         ApplyFingerRotation(middle);
@@ -91,19 +110,19 @@ public class HandBoneController : MonoBehaviour
     {
         if (finger.firstBone != null)
         {
-            float angle = finger.invertFirst ? -finger.firstAngle : finger.firstAngle;
+            float angle = finger.invertFirst ? finger.firstAngle : -finger.firstAngle;
             finger.firstBone.localRotation = finger.firstStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
 
         if (finger.secondBone != null)
         {
-            float angle = finger.invertSecond ? -finger.secondAngle : finger.secondAngle;
+            float angle = finger.invertSecond ? finger.secondAngle : -finger.secondAngle;
             finger.secondBone.localRotation = finger.secondStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
 
         if (finger.thirdBone != null)
         {
-            float angle = finger.invertThird ? -finger.thirdAngle : finger.thirdAngle;
+            float angle = finger.invertThird ? finger.thirdAngle : -finger.thirdAngle;
             finger.thirdBone.localRotation = finger.thirdStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
     }
