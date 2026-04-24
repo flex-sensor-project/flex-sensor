@@ -13,9 +13,9 @@ public class HandBoneController : MonoBehaviour
         public Transform thirdBone;
 
         [Header("Current bend values")]
-        [Range(-120f, 120f)] public float firstAngle;
-        [Range(-120f, 120f)] public float secondAngle;
-        [Range(-120f, 120f)] public float thirdAngle;
+        [Range(0f, 120f)] public float firstAngle;
+        [Range(0f, 120f)] public float secondAngle;
+        [Range(0f, 120f)] public float thirdAngle;
 
         [Header("Rotation axis")]
         public FingerRotationAxis bendAxis = FingerRotationAxis.X;
@@ -91,19 +91,19 @@ public class HandBoneController : MonoBehaviour
     {
         if (finger.firstBone != null)
         {
-            float angle = finger.invertFirst ? -finger.firstAngle : finger.firstAngle;
+            float angle = finger.invertFirst ? finger.firstAngle : -finger.firstAngle;
             finger.firstBone.localRotation = finger.firstStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
 
         if (finger.secondBone != null)
         {
-            float angle = finger.invertSecond ? -finger.secondAngle : finger.secondAngle;
+            float angle = finger.invertSecond ? finger.secondAngle : -finger.secondAngle;
             finger.secondBone.localRotation = finger.secondStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
 
         if (finger.thirdBone != null)
         {
-            float angle = finger.invertThird ? -finger.thirdAngle : finger.thirdAngle;
+            float angle = finger.invertThird ? finger.thirdAngle : -finger.thirdAngle;
             finger.thirdBone.localRotation = finger.thirdStartRotation * GetAxisRotation(finger.bendAxis, angle);
         }
     }
