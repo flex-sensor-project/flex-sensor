@@ -4,6 +4,7 @@ To install dependencies run:
 pip install PyInstaller
 pip install bleak
 pip install numpy
+pip install pyserial
 ```
 
 To compile python script run:
