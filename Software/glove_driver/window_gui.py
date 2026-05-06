@@ -197,7 +197,7 @@ class windowGui:
                 time.sleep(1)
             
             self.latest_raw_data = None
-            timeout = 0.5
+            timeout = 2.5
             start_wait = time.time()
             
             self.logger.log(f"Waiting for data for pose {pose}%.")

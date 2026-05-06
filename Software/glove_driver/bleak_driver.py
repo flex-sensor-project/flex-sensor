@@ -109,47 +109,27 @@ class BleakDriver:
         self.sock.sendto(message.encode('utf-8'), (self.udp_ip, self.udp_port))    
 
     def _notify_handler(self, sender, data):
-        current_time = time.perf_counter()
-
-        if(current_time - self.last_packet_time) < 0.005:
-            return
+        # 1. Check the exact size of the incoming packet
+        packet_length = len(data)
         
-        self.last_packet_time = current_time
-
-        if len(data) != 10:
-            self.logger.log(f"Received data of unexpected length: {len(data)} bytes. Expected 10 bytes.")
-            return
-        else:
+        # 2. Format the message depending on what we received
+        if packet_length == 10:
             values = struct.unpack('<5H', data)
-        
-
+            msg = f"DATA IN - 10 bytes: {values}"
+            
+            # Send to the Live ADC buffer
             self.parent.latest_raw_data = values
-
-            if self.is_calibrated:
-
-                self.packet_buffer.append(values)
+            self.packet_buffer.append((values, None))
+            self.ble_unit_count += 1
+        else:
+            # If the ESP32 sends a broken or wrongly sized packet, show the raw hex code
+            msg = f"WEIRD DATA - {packet_length} bytes: {data.hex()}"
             
-                cal_temp = self.parent.processor.process(values)
-                processed_values = (cal_temp["thumb"], cal_temp["index"], cal_temp["middle"], cal_temp["ring"], cal_temp["pinky"])
-                
-                self.parent.latest_processed_data = processed_values
-                
-                self.send_to_unity(processed_values)
-            
-                self.ble_unit_count += 1
-
-
-        #TODO implement validating received payload
-        #if 'E' in self.notify_buffer :
-            #if len(self.notify_buffer) < 25:
-                #print("Received an invalid: " + self.notify_buffer)
-            #else:
-                #print("Received: " + self.notify_buffer)
-            #self.parent.dyn_val_raw.set(self.notify_buffer)
-           
-            #self.parent.window.after(0, self.parent.update_raw_value, self.notify_buffer)
-            #self.notify_buffer = ""
-            
+        # 3. FORCE the message onto the GUI connection screen immediately
+        self.parent.window.after(0, self.parent.update_textbox, msg)
+        
+        # 4. Save to the log file
+        self.logger.log(msg)      
 
     async def _trigger_1s(self):
         try:
@@ -157,24 +137,16 @@ class BleakDriver:
                 await asyncio.sleep(1.0)
 
                 if self.connected == True:
-                    if self.is_calibrated:
-                        if len(self.packet_buffer) > 0:
-                            # atomic swap to fix
-                            batch, self.packet_buffer = self.packet_buffer, []
+                    if len(self.packet_buffer) > 0:
+                        batch, self.packet_buffer = self.packet_buffer, []
+                        self.parent.window.after(0, self.parent.update_raw, batch)
 
-
-                            self.parent.window.after(0, self.parent.update_raw, batch)
-
-               
-                        self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
-                        self.logger.log(f"Units per second: {self.ble_unit_count}.")
-                        self.ble_unit_count = 0
-                    else:
-                        self.parent.window.after(0, self.parent.show_calibration_warning)   
+                    self.parent.window.after(0, self.parent.update_units, self.ble_unit_count)
+                    self.logger.log(f"Units per second: {self.ble_unit_count}.")
+                    self.ble_unit_count = 0
 
         except asyncio.CancelledError:
             pass
-
 
     def _dynamic_char_search(self, client):
         target_service = client.services.get_service(self.service_uuid)
