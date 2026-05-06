@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from bleak_driver import BleakDriver
+from serial_driver import SerialDriver
 from GloveDataProcessor import GloveDataProcessor
 
 import time
@@ -23,7 +23,7 @@ class windowGui:
 
         self.textbox_raw = tk.Text(self.window, height=36, width=46)
        
-        self.bd = BleakDriver(self)
+        self.bd = SerialDriver(self)
         self.selected_index = None
 
         self.window.title("Glove driver")
