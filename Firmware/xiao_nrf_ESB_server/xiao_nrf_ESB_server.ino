@@ -73,9 +73,9 @@ void loop() {
     }
     
     Serial.print("| C: ");
-    //for (int i = 0; i < 5; i++) 
+    for (int i = 0; i < 5; i++) 
     {
-      Serial.print(ackStates[0]);
+      Serial.print(ackStates[i]);
       Serial.print(" ");
     }
     Serial.println();

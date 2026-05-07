@@ -17,13 +17,20 @@ class windowGui:
     def __init__(self):
         self.window = tk.Tk()
 
+        
+        
         self.processor = GloveDataProcessor()
         self.latest_raw_data = None
-        self.latest_processed_data = None
+        #self.latest_processed_data = None
+
+        #self.is_calibrated = False
+
+        #self.test_flex_threshold = 1500
+
 
         self.textbox_raw = tk.Text(self.window, height=36, width=46)
        
-        self.bd = SerialDriver(self)
+        self.sd = SerialDriver(self)
         self.selected_index = None
 
         self.window.title("Glove driver")
@@ -33,7 +40,7 @@ class windowGui:
         self.combobox_devices = tk.ttk.Combobox(self.window, state="readonly")
         self.combobox_devices.bind("<<ComboboxSelected>>", self._on_combobox_select)
 
-        self.button_scan = tk.Button(self.window, text="scan", command=self.bd.scan)
+        self.button_scan = tk.Button(self.window, text="scan", command=self.sd.scan)
         self.button_connect = tk.Button(self.window, text="connect", command=self._on_button_click_connect)
         self.button_disconnect = tk.Button(self.window, text="disconnect", command=self._on_button_click_disconnect)
         self.button_calibrate = tk.Button(self.window, text="calibrate", command=self._on_button_click_calibrate, state="disabled")  
@@ -77,6 +84,12 @@ class windowGui:
         self.textbox_raw.see(tk.END)
         self.textbox_raw.config(state="disabled")
         return
+
+    @DeprecationWarning
+    def send_over_usb(self, raw_data):
+        if not self.sd.is_calibrated:
+            pass
+
 
     def update_raw(self, data):
         
@@ -125,35 +138,22 @@ class windowGui:
 
     def _on_combobox_select(self, event):
         self.selected_index = self.combobox_devices.current()
-        selected_uuid = self.bd.device_uuids[self.selected_index]
-
-        self.bd.selected_device = self.bd.devices[self.selected_index]
-
-        if selected_uuid is not None:
-            self.bd.service_uuid = selected_uuid
-            self.update_textbox(f"Selected device: {self.bd.device_names[self.selected_index]} with UUID: {selected_uuid}")
-        else:
-            self.update_textbox("Warning: Selected device does not have a service UUID. Connection may fail.")
-            self.bd.service_uuid = None
+        self.sd.selected_device = self.sd.devices[self.selected_index]
+        self.update_textbox(f"Selected device: {self.sd.selected_device}")
         return
 
     def _on_button_click_connect(self):
-
         if self.combobox_devices.get() == "":
-            self.update_textbox("Please select a device before connecting.")
-        elif self.bd.service_uuid is None:
-            self.update_textbox("Warning: Selected device does not have a service UUID. Connection may fail.")  
+            self.update_textbox("Please select a device before connecting")
         else:
             self.button_connect.config(state="disabled")
             self.button_disconnect.config(state="normal")
             self.button_calibrate.config(state="normal")
-
-            self.bd.connect()
-
+            self.sd.connect()
         return
 
     def _on_button_click_disconnect(self):
-        self.bd.disconnect()
+        self.sd.disconnect()
         self.button_connect.config(state="normal")
         self.button_disconnect.config(state="disabled")
         self.button_calibrate.config(state="disabled")
@@ -164,7 +164,7 @@ class windowGui:
 
         self.processor.calibrateAgain()
 
-        self.bd.is_calibrated = False
+        self.sd.is_calibrated = False
 
         modal = tk.Toplevel(self.window)
         modal.title("Calibration")
@@ -236,7 +236,7 @@ class windowGui:
         self.window.after(0, lambda: modal.configure(bg="green"))
         self.window.after(0, lambda: instruction_label.configure(text="Calibration completely finished!", bg="green"))
         
-        self.bd.is_calibrated = True
+        self.sd.is_calibrated = True
 
         time.sleep(3)
         self.window.after(0, modal.destroy)
