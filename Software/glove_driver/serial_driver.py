@@ -71,7 +71,7 @@ class SerialDriver:
 
     def process_and_send_response(self, raw_vals):
         for i in range(5):
-            if raw_vals[i] > 1500:
+            if raw_vals[i] > 1700:
                 self.servo_motor_states[i] = True
             elif raw_vals[i] < 1100:
                 self.servo_motor_states[i] = True
